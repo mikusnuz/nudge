@@ -5,18 +5,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        AccessibilityHelper.shared.checkAndRequestAccess { [weak self] granted in
-            guard granted else { return }
-            DispatchQueue.main.async {
-                self?.setupApp()
+        // Always show menu bar icon first
+        _ = DisplayHelper.shared
+        statusBarController = StatusBarController()
+        statusBarController.setup()
+
+        // Then check accessibility and start engines
+        if AccessibilityHelper.shared.isAccessibilityGranted {
+            startEngines()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+            AccessibilityHelper.shared.checkAndRequestAccess { [weak self] granted in
+                guard granted else { return }
+                DispatchQueue.main.async {
+                    self?.startEngines()
+                }
             }
         }
     }
 
-    private func setupApp() {
-        _ = DisplayHelper.shared
-        statusBarController = StatusBarController()
-        statusBarController.setup()
+    private func startEngines() {
         HotkeyManager.shared.start()
         DragSnapManager.shared.start()
     }
