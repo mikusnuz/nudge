@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4A90D9"/>
-      <stop offset="100%" stop-color="#2563EB"/>
+      <stop offset="0%" stop-color="#2A2A2A"/>
+      <stop offset="100%" stop-color="#1A1A1A"/>
     </linearGradient>
   </defs>
 
@@ -10,11 +10,11 @@
   <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228" fill="url(#bg)"/>
 
   <!-- Left top pane -->
-  <rect x="148" y="148" width="340" height="340" rx="32" ry="32" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
+  <rect x="200" y="200" width="280" height="280" rx="32" ry="32" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.4)" stroke-width="4"/>
 
   <!-- Left bottom pane -->
-  <rect x="148" y="536" width="340" height="340" rx="32" ry="32" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
+  <rect x="200" y="544" width="280" height="280" rx="32" ry="32" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.4)" stroke-width="4"/>
 
   <!-- Right half pane (active) -->
-  <rect x="536" y="148" width="340" height="728" rx="32" ry="32" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
+  <rect x="544" y="200" width="280" height="624" rx="32" ry="32" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
 </svg>
