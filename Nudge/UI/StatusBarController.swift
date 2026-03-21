@@ -11,8 +11,12 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "rectangle.split.2x2", accessibilityDescription: "Nudge")
-                ?? makeGridImage()
+            if let icon = NSImage(named: "MenuBarIcon") {
+                icon.isTemplate = true
+                button.image = icon
+            } else {
+                button.image = makeGridImage()
+            }
         }
         let menu = NSMenu()
         menu.delegate = self
