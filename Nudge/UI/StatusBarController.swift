@@ -18,7 +18,6 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         menu.delegate = self
         statusItem.menu = menu
 
-        // Track frontmost app changes so we know which app to ignore
         NSWorkspace.shared.notificationCenter.addObserver(
             self, selector: #selector(appDidActivate(_:)),
             name: NSWorkspace.didActivateApplicationNotification, object: nil
@@ -39,67 +38,63 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     }
 
     private func buildMenu(_ menu: NSMenu) {
-        // --- Halves ---
+        // Halves
         addSnapItem(menu, .leftHalf)
         addSnapItem(menu, .rightHalf)
         addSnapItem(menu, .topHalf)
         addSnapItem(menu, .bottomHalf)
         menu.addItem(.separator())
 
-        // --- Quarters ---
+        // Quarters
         addSnapItem(menu, .topLeft)
         addSnapItem(menu, .topRight)
         addSnapItem(menu, .bottomLeft)
         addSnapItem(menu, .bottomRight)
         menu.addItem(.separator())
 
-        // --- Thirds ---
+        // Thirds
         addSnapItem(menu, .leftThird)
         addSnapItem(menu, .centerThird)
         addSnapItem(menu, .rightThird)
         menu.addItem(.separator())
 
-        // --- Two Thirds ---
+        // Two Thirds
         addSnapItem(menu, .leftTwoThirds)
         addSnapItem(menu, .centerTwoThirds)
         addSnapItem(menu, .rightTwoThirds)
         menu.addItem(.separator())
 
-        // --- Display ---
+        // Display
         addSnapItem(menu, .nextDisplay)
         addSnapItem(menu, .previousDisplay)
         menu.addItem(.separator())
 
-        // --- Maximize / Center / Restore ---
+        // Maximize / Center / Restore
         addSnapItem(menu, .maximize)
         addSnapItem(menu, .center)
         addSnapItem(menu, .restore)
         menu.addItem(.separator())
 
-        // --- Settings ---
+        // Settings
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openPreferences), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
         menu.addItem(.separator())
 
-        // --- Ignore current app (the app that was focused before opening this menu) ---
+        // Ignore
         let appName = lastFrontAppName
         let bundleID = lastFrontAppBundleID
-
         if !bundleID.isEmpty {
             let isIgnored = UserPreferences.shared.isAppIgnored(bundleID)
             let ignoreTitle = isIgnored ? "Stop Ignoring \"\(appName)\"" : "Ignore \"\(appName)\""
             let ignoreItem = NSMenuItem(title: ignoreTitle, action: #selector(toggleIgnoreApp(_:)), keyEquivalent: "")
             ignoreItem.target = self
             ignoreItem.representedObject = bundleID
-            if isIgnored {
-                ignoreItem.state = .on
-            }
             menu.addItem(ignoreItem)
             menu.addItem(.separator())
         }
 
-        // --- About / Quit ---
+        // About / Quit
         let aboutItem = NSMenuItem(title: "About Nudge", action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
@@ -112,51 +107,30 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     private func addSnapItem(_ menu: NSMenu, _ action: SnapAction) {
         let hotkey = UserPreferences.shared.hotkey(for: action)
+        let shortcutText = shortcutDescription(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
+
+        // Use attributed title: "Left Half" left-aligned, shortcut right
+        let title = action.displayName
+        let fullTitle = "\(title)        \(shortcutText)"
 
         let item = NSMenuItem()
         item.target = self
         item.action = #selector(menuActionClicked(_:))
         item.representedObject = action
-        item.title = action.displayName
         item.image = SnapIconGenerator.icon(for: action)
 
-        let (keyEquiv, modMask) = nativeKeyEquivalent(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
-        item.keyEquivalent = keyEquiv
-        item.keyEquivalentModifierMask = modMask
+        // Create attributed string with monospaced shortcut
+        let attrStr = NSMutableAttributedString(string: title, attributes: [
+            .font: NSFont.menuFont(ofSize: 14)
+        ])
+        let shortcut = NSAttributedString(string: "  \(shortcutText)", attributes: [
+            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
+            .foregroundColor: NSColor.secondaryLabelColor
+        ])
+        attrStr.append(shortcut)
+        item.attributedTitle = attrStr
 
         menu.addItem(item)
-    }
-
-    /// Convert Carbon modifier + keyCode to NSMenuItem keyEquivalent + modifierMask
-    private func nativeKeyEquivalent(modifiers: UInt32, keyCode: UInt32) -> (String, NSEvent.ModifierFlags) {
-        var mask: NSEvent.ModifierFlags = []
-        if modifiers & UInt32(controlKey) != 0 { mask.insert(.control) }
-        if modifiers & UInt32(optionKey) != 0 { mask.insert(.option) }
-        if modifiers & UInt32(cmdKey) != 0 { mask.insert(.command) }
-        if modifiers & UInt32(shiftKey) != 0 { mask.insert(.shift) }
-
-        let key: String
-        switch Int(keyCode) {
-        case kVK_LeftArrow:  key = String(UnicodeScalar(NSLeftArrowFunctionKey)!)
-        case kVK_RightArrow: key = String(UnicodeScalar(NSRightArrowFunctionKey)!)
-        case kVK_UpArrow:    key = String(UnicodeScalar(NSUpArrowFunctionKey)!)
-        case kVK_DownArrow:  key = String(UnicodeScalar(NSDownArrowFunctionKey)!)
-        case kVK_Return:     key = "\r"
-        case kVK_Delete:     key = String(UnicodeScalar(NSDeleteFunctionKey)!)
-        case kVK_ANSI_U: key = "u"
-        case kVK_ANSI_I: key = "i"
-        case kVK_ANSI_J: key = "j"
-        case kVK_ANSI_K: key = "k"
-        case kVK_ANSI_D: key = "d"
-        case kVK_ANSI_F: key = "f"
-        case kVK_ANSI_G: key = "g"
-        case kVK_ANSI_E: key = "e"
-        case kVK_ANSI_R: key = "r"
-        case kVK_ANSI_T: key = "t"
-        case kVK_ANSI_C: key = "c"
-        default: key = ""
-        }
-        return (key, mask)
     }
 
     // MARK: - Actions
@@ -197,7 +171,40 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         NSApp.terminate(nil)
     }
 
-    // MARK: - Fallback icon
+    // MARK: - Helpers
+
+    private func shortcutDescription(modifiers: UInt32, keyCode: UInt32) -> String {
+        var parts: [String] = []
+        if modifiers & UInt32(controlKey) != 0 { parts.append("⌃") }
+        if modifiers & UInt32(optionKey) != 0 { parts.append("⌥") }
+        if modifiers & UInt32(cmdKey) != 0 { parts.append("⌘") }
+        if modifiers & UInt32(shiftKey) != 0 { parts.append("⇧") }
+        parts.append(keyCodeToString(keyCode))
+        return parts.joined()
+    }
+
+    private func keyCodeToString(_ keyCode: UInt32) -> String {
+        switch Int(keyCode) {
+        case kVK_LeftArrow: return "←"
+        case kVK_RightArrow: return "→"
+        case kVK_UpArrow: return "↑"
+        case kVK_DownArrow: return "↓"
+        case kVK_Return: return "↩"
+        case kVK_Delete: return "⌫"
+        case kVK_ANSI_U: return "U"
+        case kVK_ANSI_I: return "I"
+        case kVK_ANSI_J: return "J"
+        case kVK_ANSI_K: return "K"
+        case kVK_ANSI_D: return "D"
+        case kVK_ANSI_F: return "F"
+        case kVK_ANSI_G: return "G"
+        case kVK_ANSI_E: return "E"
+        case kVK_ANSI_R: return "R"
+        case kVK_ANSI_T: return "T"
+        case kVK_ANSI_C: return "C"
+        default: return "?"
+        }
+    }
 
     private func makeGridImage() -> NSImage {
         let image = NSImage(size: NSSize(width: 18, height: 18))
