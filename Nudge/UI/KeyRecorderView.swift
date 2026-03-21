@@ -25,10 +25,10 @@ final class KeyRecorderView: NSView {
         wantsLayer = true
         layer?.borderWidth = 1
         layer?.borderColor = NSColor.separatorColor.cgColor
-        layer?.cornerRadius = 4
+        layer?.cornerRadius = 6
 
         displayLabel = NSTextField(labelWithString: "")
-        displayLabel.font = .systemFont(ofSize: 12)
+        displayLabel.font = .monospacedSystemFont(ofSize: 13, weight: .medium)
         displayLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(displayLabel)
 
@@ -67,7 +67,6 @@ final class KeyRecorderView: NSView {
 
         let keyCode = UInt32(event.keyCode)
 
-        // Check for conflicts
         for action in SnapAction.allCases {
             let existing = UserPreferences.shared.hotkey(for: action)
             if existing.modifiers == modifiers && existing.keyCode == keyCode {
@@ -94,6 +93,7 @@ final class KeyRecorderView: NSView {
     private func startRecording() {
         isRecording = true
         displayLabel.stringValue = "Type shortcut..."
+        displayLabel.font = .systemFont(ofSize: 12)
         layer?.borderColor = NSColor.systemBlue.cgColor
         layer?.borderWidth = 2
         window?.makeFirstResponder(self)
@@ -101,6 +101,7 @@ final class KeyRecorderView: NSView {
 
     private func stopRecording() {
         isRecording = false
+        displayLabel.font = .monospacedSystemFont(ofSize: 13, weight: .medium)
         layer?.borderColor = NSColor.separatorColor.cgColor
         layer?.borderWidth = 1
         if currentModifiers == 0 { displayLabel.stringValue = "" }
@@ -128,30 +129,82 @@ final class KeyRecorderView: NSView {
         if modifiers & UInt32(optionKey) != 0 { parts.append("⌥") }
         if modifiers & UInt32(cmdKey) != 0 { parts.append("⌘") }
         if modifiers & UInt32(shiftKey) != 0 { parts.append("⇧") }
-
-        switch Int(keyCode) {
-        case kVK_LeftArrow: parts.append("←")
-        case kVK_RightArrow: parts.append("→")
-        case kVK_UpArrow: parts.append("↑")
-        case kVK_DownArrow: parts.append("↓")
-        case kVK_Return: parts.append("↩")
-        case kVK_Delete: parts.append("⌫")
-        default:
-            let chars = keyCodeToChar(keyCode)
-            parts.append(chars)
-        }
-        return parts.joined()
+        parts.append(keyName(for: keyCode))
+        return parts.joined(separator: " ")
     }
 
-    private func keyCodeToChar(_ keyCode: UInt32) -> String {
-        let source = TISCopyCurrentKeyboardInputSource().takeRetainedValue()
-        guard let layoutData = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else { return "?" }
-        let data = unsafeBitCast(layoutData, to: CFData.self) as Data
-        let layout = data.withUnsafeBytes { $0.bindMemory(to: UCKeyboardLayout.self).baseAddress! }
-        var deadKeyState: UInt32 = 0
-        var length: Int = 0
-        var chars = [UniChar](repeating: 0, count: 4)
-        UCKeyTranslate(layout, UInt16(keyCode), UInt16(kUCKeyActionDisplay), 0, UInt32(LMGetKbdType()), UInt32(kUCKeyTranslateNoDeadKeysBit), &deadKeyState, 4, &length, &chars)
-        return String(utf16CodeUnits: chars, count: length).uppercased()
+    /// Explicit key name mapping — no UCKeyTranslate fallback that returns "?"
+    private func keyName(for keyCode: UInt32) -> String {
+        switch Int(keyCode) {
+        case kVK_LeftArrow: return "←"
+        case kVK_RightArrow: return "→"
+        case kVK_UpArrow: return "↑"
+        case kVK_DownArrow: return "↓"
+        case kVK_Return: return "Return"
+        case kVK_Delete: return "Delete"
+        case kVK_Space: return "Space"
+        case kVK_Tab: return "Tab"
+        case kVK_Escape: return "Esc"
+        case kVK_ANSI_A: return "A"
+        case kVK_ANSI_B: return "B"
+        case kVK_ANSI_C: return "C"
+        case kVK_ANSI_D: return "D"
+        case kVK_ANSI_E: return "E"
+        case kVK_ANSI_F: return "F"
+        case kVK_ANSI_G: return "G"
+        case kVK_ANSI_H: return "H"
+        case kVK_ANSI_I: return "I"
+        case kVK_ANSI_J: return "J"
+        case kVK_ANSI_K: return "K"
+        case kVK_ANSI_L: return "L"
+        case kVK_ANSI_M: return "M"
+        case kVK_ANSI_N: return "N"
+        case kVK_ANSI_O: return "O"
+        case kVK_ANSI_P: return "P"
+        case kVK_ANSI_Q: return "Q"
+        case kVK_ANSI_R: return "R"
+        case kVK_ANSI_S: return "S"
+        case kVK_ANSI_T: return "T"
+        case kVK_ANSI_U: return "U"
+        case kVK_ANSI_V: return "V"
+        case kVK_ANSI_W: return "W"
+        case kVK_ANSI_X: return "X"
+        case kVK_ANSI_Y: return "Y"
+        case kVK_ANSI_Z: return "Z"
+        case kVK_ANSI_0: return "0"
+        case kVK_ANSI_1: return "1"
+        case kVK_ANSI_2: return "2"
+        case kVK_ANSI_3: return "3"
+        case kVK_ANSI_4: return "4"
+        case kVK_ANSI_5: return "5"
+        case kVK_ANSI_6: return "6"
+        case kVK_ANSI_7: return "7"
+        case kVK_ANSI_8: return "8"
+        case kVK_ANSI_9: return "9"
+        case kVK_ANSI_Minus: return "-"
+        case kVK_ANSI_Equal: return "="
+        case kVK_ANSI_LeftBracket: return "["
+        case kVK_ANSI_RightBracket: return "]"
+        case kVK_ANSI_Backslash: return "\\"
+        case kVK_ANSI_Semicolon: return ";"
+        case kVK_ANSI_Quote: return "'"
+        case kVK_ANSI_Comma: return ","
+        case kVK_ANSI_Period: return "."
+        case kVK_ANSI_Slash: return "/"
+        case kVK_ANSI_Grave: return "`"
+        case kVK_F1: return "F1"
+        case kVK_F2: return "F2"
+        case kVK_F3: return "F3"
+        case kVK_F4: return "F4"
+        case kVK_F5: return "F5"
+        case kVK_F6: return "F6"
+        case kVK_F7: return "F7"
+        case kVK_F8: return "F8"
+        case kVK_F9: return "F9"
+        case kVK_F10: return "F10"
+        case kVK_F11: return "F11"
+        case kVK_F12: return "F12"
+        default: return "Key\(keyCode)"
+        }
     }
 }
