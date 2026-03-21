@@ -18,9 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarController = StatusBarController()
         statusBarController.setup()
         HotkeyManager.shared.start()
+        DragSnapManager.shared.start()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         HotkeyManager.shared.stop()
+        DragSnapManager.shared.stop()
     }
 }
