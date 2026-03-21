@@ -13,8 +13,9 @@ final class DragSnapManager {
     private var dragEventCount = 0
     private var didRestoreFromSnap = false
 
-    private let edgeThreshold: CGFloat = 50
-    private let cornerRadius: CGFloat = 150
+    // Wide zones — easy to hit
+    private let edgeThreshold: CGFloat = 100
+    private let cornerRadius: CGFloat = 200
 
     func start() {
         guard UserPreferences.shared.dragSnapEnabled else { return }
@@ -70,7 +71,6 @@ final class DragSnapManager {
         dragEventCount += 1
         if dragEventCount < 3 { return }
 
-        // On 3rd event, check if it's actually a window drag
         if dragEventCount == 3 {
             guard let window = draggedWindow,
                   let currentWindowPos = WindowManager.shared.getPosition(of: window),
@@ -88,17 +88,25 @@ final class DragSnapManager {
                 return
             }
 
-            // If window was snapped (has previous frame), restore it on drag start
-            if !didRestoreFromSnap && WindowManager.shared.hasPreviousFrame(for: window) {
+            // Restore from snap or maximized state on drag
+            if !didRestoreFromSnap {
                 didRestoreFromSnap = true
-                DispatchQueue.main.async {
-                    WindowManager.shared.restoreWindow(window)
+                if WindowManager.shared.hasPreviousFrame(for: window) {
+                    // Was snapped by Nudge — restore previous size
+                    DispatchQueue.main.async {
+                        WindowManager.shared.restoreWindow(window)
+                    }
+                    return
+                } else if WindowManager.shared.isWindowMaximized(window) {
+                    // Maximized by system or other means — restore to 70% centered
+                    DispatchQueue.main.async {
+                        WindowManager.shared.restoreFromMaximized(window)
+                    }
+                    return
                 }
-                return
             }
         }
 
-        // Detect snap zone
         let detectedAction = detectSnapZone(cursor: cursorPosition)
 
         if detectedAction != currentSnapAction {
@@ -168,7 +176,7 @@ final class DragSnapManager {
         let inCornerTop = distTop < cornerRadius
         let inCornerBottom = distBottom < cornerRadius
 
-        // Corners first (priority)
+        // Corners first
         if nearTop && inCornerLeft { return .topLeft }
         if nearTop && inCornerRight { return .topRight }
         if nearLeft && inCornerTop { return .topLeft }

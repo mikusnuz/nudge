@@ -88,6 +88,33 @@ final class WindowManager {
         lastSnapScreen.removeValue(forKey: windowID)
     }
 
+    /// Check if window is currently maximized (fills the screen's visible area)
+    func isWindowMaximized(_ window: AXUIElement) -> Bool {
+        guard let frame = getFrame(of: window) else { return false }
+        let screen = DisplayHelper.shared.currentScreen(for: frame)
+        let visibleCG = convertToCG(nsFrame: screen.visibleFrame, screen: screen)
+        // Allow 20px tolerance
+        return abs(frame.width - visibleCG.width) < 20 &&
+               abs(frame.height - visibleCG.height) < 20
+    }
+
+    /// Restore a maximized window to ~70% of screen size, centered
+    func restoreFromMaximized(_ window: AXUIElement) {
+        guard let frame = getFrame(of: window) else { return }
+        let screen = DisplayHelper.shared.currentScreen(for: frame)
+        let visible = screen.visibleFrame
+        let newWidth = visible.width * 0.7
+        let newHeight = visible.height * 0.7
+        let nsOrigin = CGPoint(
+            x: visible.minX + (visible.width - newWidth) / 2,
+            y: visible.minY + (visible.height - newHeight) / 2
+        )
+        guard let mainScreen = NSScreen.screens.first else { return }
+        let cgY = mainScreen.frame.height - nsOrigin.y - newHeight
+        setSize(of: window, to: CGSize(width: newWidth, height: newHeight))
+        setPosition(of: window, to: CGPoint(x: nsOrigin.x, y: cgY))
+    }
+
     // MARK: - Snap Actions
 
     func performAction(_ action: SnapAction) {
