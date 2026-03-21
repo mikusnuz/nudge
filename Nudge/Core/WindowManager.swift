@@ -5,6 +5,9 @@ final class WindowManager {
     static let shared = WindowManager()
 
     private var previousFrames: [String: CGRect] = [:]
+    /// Track the last snap action per window for multi-monitor cycling
+    private var lastSnapAction: [String: SnapAction] = [:]
+    private var lastSnapScreen: [String: Int] = [:] // screen index
 
     // MARK: - Get Focused Window
 
@@ -68,40 +71,100 @@ final class WindowManager {
         setSize(of: window, to: frame.size)
     }
 
-    // MARK: - Snap Actions
+    // MARK: - Restore
 
-    func performAction(_ action: SnapAction) {
-        guard let window = getFocusedWindow() else { return }
-        guard let currentFrame = getFrame(of: window) else { return }
-
-        let currentScreen = DisplayHelper.shared.currentScreen(for: currentFrame)
-
-        switch action {
-        case .restore:
-            restore(window: window)
-        case .center:
-            center(window: window, on: currentScreen)
-        case .nextDisplay:
-            moveToDisplay(window: window, from: currentScreen, next: true)
-        case .previousDisplay:
-            moveToDisplay(window: window, from: currentScreen, next: false)
-        default:
-            if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
-                let cgFrame = convertToCG(nsFrame: targetFrame, screen: currentScreen)
-                move(window: window, to: cgFrame)
-            }
-        }
+    func hasPreviousFrame(for window: AXUIElement) -> Bool {
+        guard let windowID = getWindowID(of: window) else { return false }
+        return previousFrames[windowID] != nil
     }
 
-    // MARK: - Special Actions
-
-    private func restore(window: AXUIElement) {
+    func restoreWindow(_ window: AXUIElement) {
         guard let windowID = getWindowID(of: window),
               let previousFrame = previousFrames[windowID] else { return }
         setPosition(of: window, to: previousFrame.origin)
         setSize(of: window, to: previousFrame.size)
         previousFrames.removeValue(forKey: windowID)
+        lastSnapAction.removeValue(forKey: windowID)
+        lastSnapScreen.removeValue(forKey: windowID)
     }
+
+    // MARK: - Snap Actions
+
+    func performAction(_ action: SnapAction) {
+        guard let window = getFocusedWindow() else { return }
+        guard let currentFrame = getFrame(of: window) else { return }
+        let windowID = getWindowID(of: window) ?? "unknown"
+
+        let currentScreen = DisplayHelper.shared.currentScreen(for: currentFrame)
+
+        switch action {
+        case .restore:
+            restoreWindow(window)
+            return
+        case .center:
+            center(window: window, on: currentScreen)
+            return
+        case .nextDisplay:
+            moveToDisplay(window: window, from: currentScreen, next: true)
+            return
+        case .previousDisplay:
+            moveToDisplay(window: window, from: currentScreen, next: false)
+            return
+        default:
+            break
+        }
+
+        // Multi-monitor cycling: if same action pressed again, move to next monitor
+        let screens = NSScreen.screens
+        var targetScreen = currentScreen
+
+        if let prevAction = lastSnapAction[windowID],
+           prevAction == action,
+           screens.count > 1 {
+            // Same action pressed again — cycle to next monitor
+            let currentIdx = lastSnapScreen[windowID] ?? screenIndex(of: currentScreen)
+            let direction = cycleDirection(for: action)
+            let nextIdx: Int
+            if direction > 0 {
+                nextIdx = (currentIdx + 1) % screens.count
+            } else if direction < 0 {
+                nextIdx = (currentIdx - 1 + screens.count) % screens.count
+            } else {
+                nextIdx = (currentIdx + 1) % screens.count
+            }
+            targetScreen = screens[nextIdx]
+            lastSnapScreen[windowID] = nextIdx
+        } else {
+            // New action — snap on current screen
+            lastSnapScreen[windowID] = screenIndex(of: targetScreen)
+        }
+
+        lastSnapAction[windowID] = action
+
+        if let targetFrame = SnapZone.frame(for: action, on: targetScreen) {
+            let cgFrame = convertToCG(nsFrame: targetFrame, screen: targetScreen)
+            move(window: window, to: cgFrame)
+        }
+    }
+
+    /// Determine cycle direction based on snap action
+    /// Right-side actions cycle right (to next monitor), left-side cycle left
+    private func cycleDirection(for action: SnapAction) -> Int {
+        switch action {
+        case .rightHalf, .topRight, .bottomRight, .rightThird, .rightTwoThirds:
+            return 1 // cycle right
+        case .leftHalf, .topLeft, .bottomLeft, .leftThird, .leftTwoThirds:
+            return -1 // cycle left
+        default:
+            return 1 // default: cycle right
+        }
+    }
+
+    private func screenIndex(of screen: NSScreen) -> Int {
+        return NSScreen.screens.firstIndex(of: screen) ?? 0
+    }
+
+    // MARK: - Special Actions
 
     private func center(window: AXUIElement, on screen: NSScreen) {
         guard let size = getSize(of: window) else { return }
@@ -110,7 +173,6 @@ final class WindowManager {
             x: f.minX + (f.width - size.width) / 2,
             y: f.minY + (f.height - size.height) / 2
         )
-        // Convert to CG coordinates: AX uses top-left origin
         guard let mainScreen = NSScreen.screens.first else { return }
         let cgY = mainScreen.frame.height - nsOrigin.y - size.height
         let cgOrigin = CGPoint(x: nsOrigin.x, y: cgY)

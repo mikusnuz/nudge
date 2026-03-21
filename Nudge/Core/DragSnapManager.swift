@@ -10,16 +10,17 @@ final class DragSnapManager {
     private var dragStartCursorPosition: CGPoint?
     private var currentSnapAction: SnapAction?
     private var draggedWindow: AXUIElement?
+    private var dragEventCount = 0
 
-    private let edgeThreshold: CGFloat = 5
-    private let cornerRadius: CGFloat = 50
+    private let edgeThreshold: CGFloat = 15
+    private let cornerRadius: CGFloat = 80
 
     func start() {
         guard UserPreferences.shared.dragSnapEnabled else { return }
         let mask: CGEventMask = (1 << CGEventType.leftMouseDragged.rawValue) |
                                  (1 << CGEventType.leftMouseUp.rawValue)
         eventTap = CGEvent.tapCreate(
-            tap: .cghidEventTap, place: .headInsertEventTap, options: .defaultTap,
+            tap: .cghidEventTap, place: .headInsertEventTap, options: .listenOnly,
             eventsOfInterest: mask,
             callback: { _, type, event, _ -> Unmanaged<CGEvent>? in
                 DragSnapManager.shared.handleEvent(type: type, event: event)
@@ -54,76 +55,123 @@ final class DragSnapManager {
 
     private func handleDrag(cursorPosition: CGPoint) {
         if !isDraggingWindow {
+            // First drag event — capture the focused window
             guard let window = WindowManager.shared.getFocusedWindow(),
                   let windowPos = WindowManager.shared.getPosition(of: window) else { return }
             dragStartWindowPosition = windowPos
             dragStartCursorPosition = cursorPosition
             draggedWindow = window
             isDraggingWindow = true
+            dragEventCount = 0
             return
         }
 
-        guard let window = draggedWindow,
-              let currentWindowPos = WindowManager.shared.getPosition(of: window),
-              let startWindowPos = dragStartWindowPosition,
-              let startCursorPos = dragStartCursorPosition else {
-            resetDragState(); return
+        dragEventCount += 1
+
+        // Skip first few events to let the drag stabilize
+        if dragEventCount < 3 { return }
+
+        // Check if this is actually a window drag (window moves with cursor)
+        if dragEventCount == 3 {
+            guard let window = draggedWindow,
+                  let currentWindowPos = WindowManager.shared.getPosition(of: window),
+                  let startWindowPos = dragStartWindowPosition,
+                  let startCursorPos = dragStartCursorPosition else {
+                resetDragState()
+                return
+            }
+
+            let windowDelta = hypot(currentWindowPos.x - startWindowPos.x, currentWindowPos.y - startWindowPos.y)
+            let cursorDelta = hypot(cursorPosition.x - startCursorPos.x, cursorPosition.y - startCursorPos.y)
+
+            // If cursor moved but window didn't, it's not a window drag (text selection etc)
+            if cursorDelta > 30 && windowDelta < 5 {
+                resetDragState()
+                return
+            }
         }
 
-        let windowDelta = CGPoint(x: currentWindowPos.x - startWindowPos.x, y: currentWindowPos.y - startWindowPos.y)
-        let cursorDelta = CGPoint(x: cursorPosition.x - startCursorPos.x, y: cursorPosition.y - startCursorPos.y)
-
-        let isWindowDrag = abs(windowDelta.x - cursorDelta.x) < 30 && abs(windowDelta.y - cursorDelta.y) < 30
-        if !isWindowDrag && (abs(cursorDelta.x) > 20 || abs(cursorDelta.y) > 20) {
-            resetDragState(); return
-        }
-
+        // Detect snap zone based on cursor position
         let detectedAction = detectSnapZone(cursor: cursorPosition)
+
         if detectedAction != currentSnapAction {
             currentSnapAction = detectedAction
-            if let action = detectedAction, let screen = screenForCursor(cursorPosition) {
-                if let frame = SnapZone.frame(for: action, on: screen) {
-                    SnapOverlayWindow.shared.show(at: frame)
+            DispatchQueue.main.async {
+                if let action = detectedAction, let screen = self.screenForCursor(cursorPosition) {
+                    if let frame = SnapZone.frame(for: action, on: screen) {
+                        SnapOverlayWindow.shared.show(at: frame)
+                    }
+                } else {
+                    SnapOverlayWindow.shared.hideOverlay()
                 }
-            } else {
-                SnapOverlayWindow.shared.hideOverlay()
             }
         }
     }
 
     private func handleMouseUp(cursorPosition: CGPoint) {
-        defer { resetDragState() }
-        guard isDraggingWindow, let action = currentSnapAction, let window = draggedWindow else {
-            SnapOverlayWindow.shared.hideOverlay(); return
+        let action = currentSnapAction
+        let window = draggedWindow
+        let wasDragging = isDraggingWindow
+
+        resetDragState()
+
+        guard wasDragging, let action = action, let window = window else {
+            DispatchQueue.main.async { SnapOverlayWindow.shared.hideOverlay() }
+            return
         }
         guard let screen = screenForCursor(cursorPosition) else {
-            SnapOverlayWindow.shared.hideOverlay(); return
+            DispatchQueue.main.async { SnapOverlayWindow.shared.hideOverlay() }
+            return
         }
+
         if let targetFrame = SnapZone.frame(for: action, on: screen) {
             let mainHeight = NSScreen.screens.first?.frame.height ?? 0
-            let cgFrame = CGRect(x: targetFrame.minX, y: mainHeight - targetFrame.maxY, width: targetFrame.width, height: targetFrame.height)
-            WindowManager.shared.move(window: window, to: cgFrame)
+            let cgFrame = CGRect(x: targetFrame.minX, y: mainHeight - targetFrame.maxY,
+                                 width: targetFrame.width, height: targetFrame.height)
+            DispatchQueue.main.async {
+                WindowManager.shared.move(window: window, to: cgFrame)
+                SnapOverlayWindow.shared.hideOverlay()
+            }
+        } else {
+            DispatchQueue.main.async { SnapOverlayWindow.shared.hideOverlay() }
         }
-        SnapOverlayWindow.shared.hideOverlay()
     }
 
+    // MARK: - Zone Detection
+
     func detectSnapZone(cursor: CGPoint) -> SnapAction? {
-        guard let screen = screenForCursor(cursor) else { return nil }
+        // CGEvent cursor uses CG coordinates (top-left origin)
+        // NSScreen.frame also uses a global coordinate system where (0,0) is bottom-left of main screen
+        // We need to convert cursor CG coords to NS coords for comparison
+        guard let mainScreen = NSScreen.screens.first else { return nil }
+        let mainHeight = mainScreen.frame.height
+        let nsCursor = CGPoint(x: cursor.x, y: mainHeight - cursor.y)
+
+        guard let screen = screenForNSPoint(nsCursor) else { return nil }
         let frame = screen.frame
 
-        let nearLeft = cursor.x - frame.minX < edgeThreshold
-        let nearRight = frame.maxX - cursor.x < edgeThreshold
-        let nearTop = cursor.y - frame.minY < edgeThreshold
-        let inCornerLeft = cursor.x - frame.minX < cornerRadius
-        let inCornerRight = frame.maxX - cursor.x < cornerRadius
-        let inCornerTop = cursor.y - frame.minY < cornerRadius
-        let inCornerBottom = frame.maxY - cursor.y < cornerRadius
+        let distLeft = nsCursor.x - frame.minX
+        let distRight = frame.maxX - nsCursor.x
+        let distTop = frame.maxY - nsCursor.y
+        let distBottom = nsCursor.y - frame.minY
 
-        // Corners (priority)
+        let nearLeft = distLeft < edgeThreshold
+        let nearRight = distRight < edgeThreshold
+        let nearTop = distTop < edgeThreshold
+        let nearBottom = distBottom < edgeThreshold
+
+        let inCornerLeft = distLeft < cornerRadius
+        let inCornerRight = distRight < cornerRadius
+        let inCornerTop = distTop < cornerRadius
+        let inCornerBottom = distBottom < cornerRadius
+
+        // Corners (priority over edges)
         if nearTop && inCornerLeft { return .topLeft }
         if nearTop && inCornerRight { return .topRight }
         if nearLeft && inCornerTop { return .topLeft }
         if nearRight && inCornerTop { return .topRight }
+        if (nearBottom || nearLeft) && inCornerLeft && inCornerBottom { return .bottomLeft }
+        if (nearBottom || nearRight) && inCornerRight && inCornerBottom { return .bottomRight }
         if nearLeft && inCornerBottom { return .bottomLeft }
         if nearRight && inCornerBottom { return .bottomRight }
 
@@ -136,8 +184,19 @@ final class DragSnapManager {
         return nil
     }
 
-    private func screenForCursor(_ point: CGPoint) -> NSScreen? {
-        return DisplayHelper.shared.screen(at: point)
+    private func screenForCursor(_ cgPoint: CGPoint) -> NSScreen? {
+        guard let mainScreen = NSScreen.screens.first else { return nil }
+        let nsPoint = CGPoint(x: cgPoint.x, y: mainScreen.frame.height - cgPoint.y)
+        return screenForNSPoint(nsPoint)
+    }
+
+    private func screenForNSPoint(_ nsPoint: CGPoint) -> NSScreen? {
+        for screen in NSScreen.screens {
+            if screen.frame.contains(nsPoint) {
+                return screen
+            }
+        }
+        return NSScreen.main
     }
 
     private func resetDragState() {
@@ -146,5 +205,6 @@ final class DragSnapManager {
         dragStartCursorPosition = nil
         currentSnapAction = nil
         draggedWindow = nil
+        dragEventCount = 0
     }
 }
