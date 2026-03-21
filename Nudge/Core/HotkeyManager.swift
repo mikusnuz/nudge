@@ -8,6 +8,7 @@ final class HotkeyManager {
     private var nextID: UInt32 = 1
     private var isRunning = false
     private var handlerInstalled = false
+    private var lastEventTime: UInt64 = 0
 
     func start() {
         guard !isRunning else { return }
@@ -55,6 +56,15 @@ final class HotkeyManager {
 
     private func handleHotkey(id: UInt32) {
         guard let action = actionMap[id] else { return }
+
+        // Deduplicate Carbon double-fire: ignore if same event within 50ms
+        let now = DispatchTime.now().uptimeNanoseconds
+        let elapsed = now - lastEventTime
+        if elapsed < 50_000_000 { // 50ms in nanoseconds
+            return
+        }
+        lastEventTime = now
+
         WindowManager.shared.performAction(action)
     }
 
