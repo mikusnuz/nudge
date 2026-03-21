@@ -5,9 +5,6 @@ final class WindowManager {
     static let shared = WindowManager()
 
     private var previousFrames: [String: CGRect] = [:]
-    /// Track the last snap action per window for multi-monitor cycling
-    private var lastSnapAction: [String: SnapAction] = [:]
-    private var lastSnapScreen: [String: Int] = [:] // screen index
 
     // MARK: - Get Focused Window
 
@@ -84,63 +81,45 @@ final class WindowManager {
         setPosition(of: window, to: previousFrame.origin)
         setSize(of: window, to: previousFrame.size)
         previousFrames.removeValue(forKey: windowID)
-        lastSnapAction.removeValue(forKey: windowID)
-        lastSnapScreen.removeValue(forKey: windowID)
     }
 
-    /// Check if window is currently maximized (fills the screen's visible area)
     func isWindowMaximized(_ window: AXUIElement) -> Bool {
         guard let frame = getFrame(of: window) else { return false }
         let screen = DisplayHelper.shared.currentScreen(for: frame)
         let visibleCG = convertToCG(nsFrame: screen.visibleFrame, screen: screen)
-        // Allow 20px tolerance
         return abs(frame.width - visibleCG.width) < 20 &&
                abs(frame.height - visibleCG.height) < 20
     }
 
-    /// Restore a maximized window to ~70% of screen size, positioned so title bar is at cursor
     func restoreFromMaximized(_ window: AXUIElement, cursorCG: CGPoint? = nil) {
         guard let frame = getFrame(of: window) else { return }
         let screen = DisplayHelper.shared.currentScreen(for: frame)
         let visible = screen.visibleFrame
         let newWidth = visible.width * 0.7
         let newHeight = visible.height * 0.7
-
-        // Position window so the title bar is at the cursor position
-        // CG coordinates: (0,0) = top-left, y increases downward
         let cgX: CGFloat
         let cgY: CGFloat
-
         if let cursor = cursorCG {
-            // Center horizontally on cursor, top edge at cursor Y
             cgX = cursor.x - newWidth / 2
             cgY = cursor.y
         } else {
-            // Fallback: center on screen
             guard let mainScreen = NSScreen.screens.first else { return }
-            let nsOriginX = visible.minX + (visible.width - newWidth) / 2
-            let nsOriginY = visible.minY + (visible.height - newHeight) / 2
-            cgX = nsOriginX
-            cgY = mainScreen.frame.height - nsOriginY - newHeight
+            cgX = visible.minX + (visible.width - newWidth) / 2
+            cgY = mainScreen.frame.height - (visible.minY + (visible.height - newHeight) / 2) - newHeight
         }
-
         setSize(of: window, to: CGSize(width: newWidth, height: newHeight))
         setPosition(of: window, to: CGPoint(x: cgX, y: cgY))
     }
 
-    /// Restore Nudge-snapped window, positioned so title bar is at cursor
     func restoreWindowAtCursor(_ window: AXUIElement, cursorCG: CGPoint) {
         guard let windowID = getWindowID(of: window),
               let previousFrame = previousFrames[windowID] else { return }
         let prevSize = previousFrame.size
-        // Center horizontally on cursor, top edge at cursor Y
         let cgX = cursorCG.x - prevSize.width / 2
         let cgY = cursorCG.y
         setPosition(of: window, to: CGPoint(x: cgX, y: cgY))
         setSize(of: window, to: prevSize)
         previousFrames.removeValue(forKey: windowID)
-        lastSnapAction.removeValue(forKey: windowID)
-        lastSnapScreen.removeValue(forKey: windowID)
     }
 
     // MARK: - Snap Actions
@@ -148,7 +127,6 @@ final class WindowManager {
     func performAction(_ action: SnapAction) {
         guard let window = getFocusedWindow() else { return }
         guard let currentFrame = getFrame(of: window) else { return }
-        let windowID = getWindowID(of: window) ?? "unknown"
 
         let currentScreen = DisplayHelper.shared.currentScreen(for: currentFrame)
 
@@ -169,54 +147,88 @@ final class WindowManager {
             break
         }
 
-        // Multi-monitor cycling: if same action pressed again, move to next monitor
-        let screens = NSScreen.screens
-        var targetScreen = currentScreen
-
-        if let prevAction = lastSnapAction[windowID],
-           prevAction == action,
-           screens.count > 1 {
-            // Same action pressed again — cycle to next monitor
-            let currentIdx = lastSnapScreen[windowID] ?? screenIndex(of: currentScreen)
-            let direction = cycleDirection(for: action)
-            let nextIdx: Int
-            if direction > 0 {
-                nextIdx = (currentIdx + 1) % screens.count
-            } else if direction < 0 {
-                nextIdx = (currentIdx - 1 + screens.count) % screens.count
-            } else {
-                nextIdx = (currentIdx + 1) % screens.count
+        // Check if window is ALREADY at the target snap position on this screen
+        if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
+            let cgTarget = convertToCG(nsFrame: targetFrame, screen: currentScreen)
+            if isFrameMatch(currentFrame, cgTarget) {
+                // Already there → cycle to next monitor with mirrored position
+                cycleToNextMonitor(window: window, action: action, from: currentScreen)
+                return
             }
-            targetScreen = screens[nextIdx]
-            lastSnapScreen[windowID] = nextIdx
-        } else {
-            // New action — snap on current screen
-            lastSnapScreen[windowID] = screenIndex(of: targetScreen)
         }
 
-        lastSnapAction[windowID] = action
-
-        if let targetFrame = SnapZone.frame(for: action, on: targetScreen) {
-            let cgFrame = convertToCG(nsFrame: targetFrame, screen: targetScreen)
+        // Normal snap on current screen
+        if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
+            let cgFrame = convertToCG(nsFrame: targetFrame, screen: currentScreen)
             move(window: window, to: cgFrame)
         }
     }
 
-    /// Determine cycle direction based on snap action
-    /// Right-side actions cycle right (to next monitor), left-side cycle left
-    private func cycleDirection(for action: SnapAction) -> Int {
-        switch action {
-        case .rightHalf, .topRight, .bottomRight, .rightThird, .rightTwoThirds:
-            return 1 // cycle right
-        case .leftHalf, .topLeft, .bottomLeft, .leftThird, .leftTwoThirds:
-            return -1 // cycle left
-        default:
-            return 1 // default: cycle right
+    // MARK: - Multi-Monitor Cycling
+
+    /// When window is already at the target position, move to next monitor with mirrored position
+    private func cycleToNextMonitor(window: AXUIElement, action: SnapAction, from screen: NSScreen) {
+        let screens = NSScreen.screens
+        guard screens.count > 1 else { return }
+
+        let direction = cycleDirection(for: action)
+        let targetScreen: NSScreen?
+        if direction > 0 {
+            targetScreen = DisplayHelper.shared.nextScreen(from: screen)
+        } else {
+            targetScreen = DisplayHelper.shared.previousScreen(from: screen)
+        }
+        guard let nextScreen = targetScreen else { return }
+
+        // Mirror the action horizontally when crossing monitors
+        let mirroredAction = mirrorAction(action)
+
+        if let targetFrame = SnapZone.frame(for: mirroredAction, on: nextScreen) {
+            let cgFrame = convertToCG(nsFrame: targetFrame, screen: nextScreen)
+            move(window: window, to: cgFrame)
         }
     }
 
-    private func screenIndex(of screen: NSScreen) -> Int {
-        return NSScreen.screens.firstIndex(of: screen) ?? 0
+    /// Mirror an action horizontally (right↔left, keeping top/bottom)
+    private func mirrorAction(_ action: SnapAction) -> SnapAction {
+        switch action {
+        case .leftHalf: return .rightHalf
+        case .rightHalf: return .leftHalf
+        case .topLeft: return .topRight
+        case .topRight: return .topLeft
+        case .bottomLeft: return .bottomRight
+        case .bottomRight: return .bottomLeft
+        case .leftThird: return .rightThird
+        case .rightThird: return .leftThird
+        case .leftTwoThirds: return .rightTwoThirds
+        case .rightTwoThirds: return .leftTwoThirds
+        // These don't mirror
+        case .centerThird: return .centerThird
+        case .topHalf: return .topHalf
+        case .bottomHalf: return .bottomHalf
+        case .maximize: return .maximize
+        default: return action
+        }
+    }
+
+    /// Right-side actions cycle right, left-side actions cycle left
+    private func cycleDirection(for action: SnapAction) -> Int {
+        switch action {
+        case .rightHalf, .topRight, .bottomRight, .rightThird, .rightTwoThirds:
+            return 1
+        case .leftHalf, .topLeft, .bottomLeft, .leftThird, .leftTwoThirds:
+            return -1
+        default:
+            return 1
+        }
+    }
+
+    /// Check if two frames match (within tolerance)
+    private func isFrameMatch(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 15) -> Bool {
+        return abs(a.origin.x - b.origin.x) < tolerance &&
+               abs(a.origin.y - b.origin.y) < tolerance &&
+               abs(a.width - b.width) < tolerance &&
+               abs(a.height - b.height) < tolerance
     }
 
     // MARK: - Special Actions
@@ -278,7 +290,7 @@ final class WindowManager {
 
     // MARK: - Coordinate Conversion
 
-    private func convertToCG(nsFrame: CGRect, screen: NSScreen) -> CGRect {
+    func convertToCG(nsFrame: CGRect, screen: NSScreen) -> CGRect {
         guard let mainScreen = NSScreen.screens.first else { return nsFrame }
         let mainHeight = mainScreen.frame.height
         let cgY = mainHeight - nsFrame.maxY
