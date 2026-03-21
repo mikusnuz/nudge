@@ -10,17 +10,35 @@ struct SnapIconGenerator {
             let box = rect.insetBy(dx: inset, dy: inset)
             let radius: CGFloat = 2
 
-            // Outer frame
-            NSColor.secondaryLabelColor.withAlphaComponent(0.4).setStroke()
-            let outline = NSBezierPath(roundedRect: box, xRadius: radius, yRadius: radius)
-            outline.lineWidth = 1
-            outline.stroke()
-
-            // Filled region
-            if let fillRect = fillRect(for: action, in: box) {
+            if action == .restore {
+                // Two overlapping rectangles (classic restore icon)
+                let backRect = NSRect(x: box.minX + box.width * 0.25, y: box.minY + box.height * 0.3,
+                                      width: box.width * 0.6, height: box.height * 0.55)
+                let frontRect = NSRect(x: box.minX + box.width * 0.15, y: box.minY + box.height * 0.15,
+                                       width: box.width * 0.6, height: box.height * 0.55)
+                NSColor.secondaryLabelColor.withAlphaComponent(0.4).setStroke()
+                let back = NSBezierPath(roundedRect: backRect, xRadius: 1, yRadius: 1)
+                back.lineWidth = 1
+                back.stroke()
                 NSColor.controlTextColor.setFill()
-                let fill = NSBezierPath(roundedRect: fillRect, xRadius: 1, yRadius: 1)
-                fill.fill()
+                NSColor.controlTextColor.setStroke()
+                let front = NSBezierPath(roundedRect: frontRect, xRadius: 1, yRadius: 1)
+                front.lineWidth = 1
+                front.fill()
+                front.stroke()
+            } else {
+                // Outer frame
+                NSColor.secondaryLabelColor.withAlphaComponent(0.4).setStroke()
+                let outline = NSBezierPath(roundedRect: box, xRadius: radius, yRadius: radius)
+                outline.lineWidth = 1
+                outline.stroke()
+
+                // Filled region
+                if let fillRect = fillRect(for: action, in: box) {
+                    NSColor.controlTextColor.setFill()
+                    let fill = NSBezierPath(roundedRect: fillRect, xRadius: 1, yRadius: 1)
+                    fill.fill()
+                }
             }
 
             return true
@@ -84,9 +102,9 @@ struct SnapIconGenerator {
             let ch = h * 0.5
             return NSRect(x: x + (w - cw) / 2, y: y + (h - ch) / 2, width: cw, height: ch)
 
-        // Restore — smaller rect offset to show "unstacking"
+        // Restore — handled specially (two overlapping rects)
         case .restore:
-            return NSRect(x: x + w * 0.15, y: y + h * 0.15, width: w * 0.55, height: h * 0.55)
+            return nil
 
         // Next Display — right arrow shape (right half filled)
         case .nextDisplay:

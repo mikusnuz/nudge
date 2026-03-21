@@ -5,6 +5,8 @@ import ServiceManagement
 final class StatusBarController: NSObject, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var preferencesWindow: PreferencesWindow?
+    private var lastFrontAppName: String = ""
+    private var lastFrontAppBundleID: String = ""
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -15,9 +17,22 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
+
+        // Track frontmost app changes so we know which app to ignore
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self, selector: #selector(appDidActivate(_:)),
+            name: NSWorkspace.didActivateApplicationNotification, object: nil
+        )
     }
 
-    // Rebuild menu each time it opens to get current frontmost app
+    @objc private func appDidActivate(_ notification: Notification) {
+        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+              let bundleID = app.bundleIdentifier,
+              bundleID != "app.nudge.Nudge" else { return }
+        lastFrontAppName = app.localizedName ?? "App"
+        lastFrontAppBundleID = bundleID
+    }
+
     func menuWillOpen(_ menu: NSMenu) {
         menu.removeAllItems()
         buildMenu(menu)
@@ -67,12 +82,11 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         menu.addItem(settingsItem)
         menu.addItem(.separator())
 
-        // --- Ignore current app ---
-        let frontApp = NSWorkspace.shared.frontmostApplication
-        let appName = frontApp?.localizedName ?? "App"
-        let bundleID = frontApp?.bundleIdentifier ?? ""
+        // --- Ignore current app (the app that was focused before opening this menu) ---
+        let appName = lastFrontAppName
+        let bundleID = lastFrontAppBundleID
 
-        if !bundleID.isEmpty && bundleID != "app.nudge.Nudge" {
+        if !bundleID.isEmpty {
             let isIgnored = UserPreferences.shared.isAppIgnored(bundleID)
             let ignoreTitle = isIgnored ? "Stop Ignoring \"\(appName)\"" : "Ignore \"\(appName)\""
             let ignoreItem = NSMenuItem(title: ignoreTitle, action: #selector(toggleIgnoreApp(_:)), keyEquivalent: "")
