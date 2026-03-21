@@ -37,4 +37,29 @@ final class UserPreferences {
     func hotkey(for action: SnapAction) -> (modifiers: UInt32, keyCode: UInt32) {
         return customHotkey(for: action) ?? action.defaultHotkey
     }
+
+    // MARK: - Ignored Apps
+
+    var ignoredApps: [String] {
+        get { defaults.stringArray(forKey: "ignoredApps") ?? [] }
+        set { defaults.set(newValue, forKey: "ignoredApps") }
+    }
+
+    func isAppIgnored(_ bundleID: String) -> Bool {
+        return ignoredApps.contains(bundleID)
+    }
+
+    func addIgnoredApp(_ bundleID: String) {
+        var list = ignoredApps
+        if !list.contains(bundleID) {
+            list.append(bundleID)
+            ignoredApps = list
+        }
+    }
+
+    func removeIgnoredApp(_ bundleID: String) {
+        var list = ignoredApps
+        list.removeAll { $0 == bundleID }
+        ignoredApps = list
+    }
 }

@@ -2,7 +2,7 @@ import Cocoa
 import Carbon
 import ServiceManagement
 
-final class StatusBarController {
+final class StatusBarController: NSObject, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var preferencesWindow: PreferencesWindow?
 
@@ -12,56 +12,155 @@ final class StatusBarController {
             button.image = NSImage(systemSymbolName: "rectangle.split.2x2", accessibilityDescription: "Nudge")
                 ?? makeGridImage()
         }
-        buildMenu()
-    }
-
-    private func buildMenu() {
         let menu = NSMenu()
-        let categories = ["Halves", "Quarters", "Thirds", "Two Thirds", "Other", "Display"]
-        for category in categories {
-            let actions = SnapAction.allCases.filter { $0.category == category }
-            if actions.isEmpty { continue }
-            if menu.items.count > 0 { menu.addItem(.separator()) }
-            for action in actions {
-                let item = NSMenuItem(title: action.displayName, action: #selector(menuActionClicked(_:)), keyEquivalent: "")
-                item.target = self
-                item.representedObject = action
-                let hotkey = UserPreferences.shared.hotkey(for: action)
-                item.toolTip = shortcutDescription(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
-                menu.addItem(item)
-            }
-        }
-        menu.addItem(.separator())
-
-        let launchItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin(_:)), keyEquivalent: "")
-        launchItem.target = self
-        launchItem.state = UserPreferences.shared.launchAtLogin ? .on : .off
-        menu.addItem(launchItem)
-
-        let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ",")
-        prefsItem.target = self
-        menu.addItem(prefsItem)
-
-        menu.addItem(.separator())
-
-        let quitItem = NSMenuItem(title: "Quit Nudge", action: #selector(quit), keyEquivalent: "q")
-        quitItem.target = self
-        menu.addItem(quitItem)
-
+        menu.delegate = self
         statusItem.menu = menu
     }
+
+    // Rebuild menu each time it opens to get current frontmost app
+    func menuWillOpen(_ menu: NSMenu) {
+        menu.removeAllItems()
+        buildMenu(menu)
+    }
+
+    private func buildMenu(_ menu: NSMenu) {
+        // --- Halves ---
+        addSnapItem(menu, .leftHalf, icon: "◧")
+        addSnapItem(menu, .rightHalf, icon: "◨")
+        addSnapItem(menu, .topHalf, icon: "⬒")
+        addSnapItem(menu, .bottomHalf, icon: "⬓")
+        menu.addItem(.separator())
+
+        // --- Quarters ---
+        addSnapItem(menu, .topLeft, icon: "◰")
+        addSnapItem(menu, .topRight, icon: "◳")
+        addSnapItem(menu, .bottomLeft, icon: "◱")
+        addSnapItem(menu, .bottomRight, icon: "◲")
+        menu.addItem(.separator())
+
+        // --- Thirds ---
+        addSnapItem(menu, .leftThird, icon: "⊏")
+        addSnapItem(menu, .centerThird, icon: "⊓")
+        addSnapItem(menu, .rightThird, icon: "⊐")
+        menu.addItem(.separator())
+
+        // --- Two Thirds ---
+        addSnapItem(menu, .leftTwoThirds, icon: "◧")
+        addSnapItem(menu, .centerTwoThirds, icon: "⊓")
+        addSnapItem(menu, .rightTwoThirds, icon: "◨")
+        menu.addItem(.separator())
+
+        // --- Display ---
+        addSnapItem(menu, .nextDisplay, icon: "▶")
+        addSnapItem(menu, .previousDisplay, icon: "◀")
+        menu.addItem(.separator())
+
+        // --- Maximize / Center / Restore ---
+        addSnapItem(menu, .maximize, icon: "⬜")
+        addSnapItem(menu, .center, icon: "⊞")
+        addSnapItem(menu, .restore, icon: "↩")
+        menu.addItem(.separator())
+
+        // --- Settings ---
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openPreferences), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        menu.addItem(.separator())
+
+        // --- Ignore current app ---
+        let frontApp = NSWorkspace.shared.frontmostApplication
+        let appName = frontApp?.localizedName ?? "App"
+        let bundleID = frontApp?.bundleIdentifier ?? ""
+
+        if !bundleID.isEmpty && bundleID != "app.nudge.Nudge" {
+            let isIgnored = UserPreferences.shared.isAppIgnored(bundleID)
+            let ignoreTitle = isIgnored ? "Stop Ignoring \"\(appName)\"" : "Ignore \"\(appName)\""
+            let ignoreItem = NSMenuItem(title: ignoreTitle, action: #selector(toggleIgnoreApp(_:)), keyEquivalent: "")
+            ignoreItem.target = self
+            ignoreItem.representedObject = bundleID
+            if isIgnored {
+                ignoreItem.state = .on
+            }
+            menu.addItem(ignoreItem)
+            menu.addItem(.separator())
+        }
+
+        // --- About / Quit ---
+        let aboutItem = NSMenuItem(title: "About Nudge", action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+    }
+
+    private func addSnapItem(_ menu: NSMenu, _ action: SnapAction, icon: String) {
+        let hotkey = UserPreferences.shared.hotkey(for: action)
+
+        // Build the menu item with shortcut shown inline
+        let item = NSMenuItem()
+        item.target = self
+        item.action = #selector(menuActionClicked(_:))
+        item.representedObject = action
+
+        // Set key equivalent for native shortcut display
+        let (keyEquiv, modMask) = nativeKeyEquivalent(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
+        item.keyEquivalent = keyEquiv
+        item.keyEquivalentModifierMask = modMask
+
+        // Title with icon
+        item.title = "\(icon)  \(action.displayName)"
+
+        menu.addItem(item)
+    }
+
+    /// Convert Carbon modifier + keyCode to NSMenuItem keyEquivalent + modifierMask
+    private func nativeKeyEquivalent(modifiers: UInt32, keyCode: UInt32) -> (String, NSEvent.ModifierFlags) {
+        var mask: NSEvent.ModifierFlags = []
+        if modifiers & UInt32(controlKey) != 0 { mask.insert(.control) }
+        if modifiers & UInt32(optionKey) != 0 { mask.insert(.option) }
+        if modifiers & UInt32(cmdKey) != 0 { mask.insert(.command) }
+        if modifiers & UInt32(shiftKey) != 0 { mask.insert(.shift) }
+
+        let key: String
+        switch Int(keyCode) {
+        case kVK_LeftArrow:  key = String(UnicodeScalar(NSLeftArrowFunctionKey)!)
+        case kVK_RightArrow: key = String(UnicodeScalar(NSRightArrowFunctionKey)!)
+        case kVK_UpArrow:    key = String(UnicodeScalar(NSUpArrowFunctionKey)!)
+        case kVK_DownArrow:  key = String(UnicodeScalar(NSDownArrowFunctionKey)!)
+        case kVK_Return:     key = "\r"
+        case kVK_Delete:     key = String(UnicodeScalar(NSDeleteFunctionKey)!)
+        case kVK_ANSI_U: key = "u"
+        case kVK_ANSI_I: key = "i"
+        case kVK_ANSI_J: key = "j"
+        case kVK_ANSI_K: key = "k"
+        case kVK_ANSI_D: key = "d"
+        case kVK_ANSI_F: key = "f"
+        case kVK_ANSI_G: key = "g"
+        case kVK_ANSI_E: key = "e"
+        case kVK_ANSI_R: key = "r"
+        case kVK_ANSI_T: key = "t"
+        case kVK_ANSI_C: key = "c"
+        default: key = ""
+        }
+        return (key, mask)
+    }
+
+    // MARK: - Actions
 
     @objc private func menuActionClicked(_ sender: NSMenuItem) {
         guard let action = sender.representedObject as? SnapAction else { return }
         WindowManager.shared.performAction(action)
     }
 
-    @objc private func toggleLaunchAtLogin(_ sender: NSMenuItem) {
-        let newState = !UserPreferences.shared.launchAtLogin
-        UserPreferences.shared.launchAtLogin = newState
-        sender.state = newState ? .on : .off
-        if #available(macOS 13.0, *) {
-            try? newState ? SMAppService.mainApp.register() : SMAppService.mainApp.unregister()
+    @objc private func toggleIgnoreApp(_ sender: NSMenuItem) {
+        guard let bundleID = sender.representedObject as? String else { return }
+        if UserPreferences.shared.isAppIgnored(bundleID) {
+            UserPreferences.shared.removeIgnoredApp(bundleID)
+        } else {
+            UserPreferences.shared.addIgnoredApp(bundleID)
         }
     }
 
@@ -73,9 +172,21 @@ final class StatusBarController {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    @objc private func showAbout() {
+        let alert = NSAlert()
+        alert.messageText = "Nudge"
+        alert.informativeText = "Version 1.0.0\nA free, open-source macOS window manager.\n\nhttps://github.com/mikusnuz/nudge"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        NSApp.activate(ignoringOtherApps: true)
+        alert.runModal()
+    }
+
     @objc private func quit() {
         NSApp.terminate(nil)
     }
+
+    // MARK: - Fallback icon
 
     private func makeGridImage() -> NSImage {
         let image = NSImage(size: NSSize(width: 18, height: 18))
@@ -88,38 +199,5 @@ final class StatusBarController {
         image.unlockFocus()
         image.isTemplate = true
         return image
-    }
-
-    private func shortcutDescription(modifiers: UInt32, keyCode: UInt32) -> String {
-        var parts: [String] = []
-        if modifiers & UInt32(controlKey) != 0 { parts.append("⌃") }
-        if modifiers & UInt32(optionKey) != 0 { parts.append("⌥") }
-        if modifiers & UInt32(cmdKey) != 0 { parts.append("⌘") }
-        if modifiers & UInt32(shiftKey) != 0 { parts.append("⇧") }
-        parts.append(keyCodeToString(keyCode))
-        return parts.joined()
-    }
-
-    private func keyCodeToString(_ keyCode: UInt32) -> String {
-        switch Int(keyCode) {
-        case kVK_LeftArrow: return "←"
-        case kVK_RightArrow: return "→"
-        case kVK_UpArrow: return "↑"
-        case kVK_DownArrow: return "↓"
-        case kVK_Return: return "↩"
-        case kVK_Delete: return "⌫"
-        case kVK_ANSI_U: return "U"
-        case kVK_ANSI_I: return "I"
-        case kVK_ANSI_J: return "J"
-        case kVK_ANSI_K: return "K"
-        case kVK_ANSI_D: return "D"
-        case kVK_ANSI_F: return "F"
-        case kVK_ANSI_G: return "G"
-        case kVK_ANSI_E: return "E"
-        case kVK_ANSI_R: return "R"
-        case kVK_ANSI_T: return "T"
-        case kVK_ANSI_C: return "C"
-        default: return "?"
-        }
     }
 }

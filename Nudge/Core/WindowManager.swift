@@ -126,6 +126,16 @@ final class WindowManager {
 
     func performAction(_ action: SnapAction) {
         guard let window = getFocusedWindow() else { return }
+
+        // Skip ignored apps
+        var pid: pid_t = 0
+        AXUIElementGetPid(window, &pid)
+        if let app = NSRunningApplication(processIdentifier: pid),
+           let bundleID = app.bundleIdentifier,
+           UserPreferences.shared.isAppIgnored(bundleID) {
+            return
+        }
+
         guard let currentFrame = getFrame(of: window) else { return }
 
         let currentScreen = DisplayHelper.shared.currentScreen(for: currentFrame)
