@@ -6,6 +6,7 @@ final class DragSnapManager {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var isDraggingWindow = false
+    private var isTitleBarDrag = false
     private var dragStartWindowPosition: CGPoint?
     private var dragStartCursorPosition: CGPoint?
     private var currentSnapAction: SnapAction?
@@ -13,9 +14,9 @@ final class DragSnapManager {
     private var dragEventCount = 0
     private var didRestoreFromSnap = false
 
-    // Wide zones — easy to hit
     private let edgeThreshold: CGFloat = 100
     private let cornerRadius: CGFloat = 200
+    private let titleBarHeight: CGFloat = 40
 
     func start() {
         guard UserPreferences.shared.dragSnapEnabled else { return }
@@ -58,7 +59,15 @@ final class DragSnapManager {
     private func handleDrag(cursorPosition: CGPoint) {
         if !isDraggingWindow {
             guard let window = WindowManager.shared.getFocusedWindow(),
-                  let windowPos = WindowManager.shared.getPosition(of: window) else { return }
+                  let windowPos = WindowManager.shared.getPosition(of: window),
+                  let windowSize = WindowManager.shared.getSize(of: window) else { return }
+
+            // Check if drag started on the title bar (top ~40px of window)
+            // CG coordinates: window top = windowPos.y, title bar = windowPos.y to windowPos.y + 40
+            let cursorRelativeY = cursorPosition.y - windowPos.y
+            isTitleBarDrag = cursorRelativeY >= 0 && cursorRelativeY <= titleBarHeight
+                && cursorPosition.x >= windowPos.x && cursorPosition.x <= windowPos.x + windowSize.width
+
             dragStartWindowPosition = windowPos
             dragStartCursorPosition = cursorPosition
             draggedWindow = window
@@ -88,10 +97,10 @@ final class DragSnapManager {
                 return
             }
 
-            // Restore from snap or maximized state on drag — position title bar at cursor
-            if !didRestoreFromSnap {
+            // Only restore from snap if dragging from the title bar
+            if !didRestoreFromSnap && isTitleBarDrag {
                 didRestoreFromSnap = true
-                let cursor = cursorPosition // CG coordinates
+                let cursor = cursorPosition
                 if WindowManager.shared.hasPreviousFrame(for: window) {
                     DispatchQueue.main.async {
                         WindowManager.shared.restoreWindowAtCursor(window, cursorCG: cursor)
@@ -208,6 +217,7 @@ final class DragSnapManager {
 
     private func resetDragState() {
         isDraggingWindow = false
+        isTitleBarDrag = false
         dragStartWindowPosition = nil
         dragStartCursorPosition = nil
         currentSnapAction = nil

@@ -151,7 +151,12 @@ final class WindowManager {
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgTarget = convertToCG(nsFrame: targetFrame, screen: currentScreen)
             if isFrameMatch(currentFrame, cgTarget) {
-                // Already there → cycle to next monitor with mirrored position
+                // Already there
+                // maximize, topHalf, bottomHalf, centerThird: no cycling, do nothing
+                if !action.hasCycleDirection {
+                    return
+                }
+                // Try to cycle to next monitor (no wrap-around)
                 cycleToNextMonitor(window: window, action: action, from: currentScreen)
                 return
             }

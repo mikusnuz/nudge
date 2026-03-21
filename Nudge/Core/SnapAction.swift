@@ -57,6 +57,17 @@ enum SnapAction: String, CaseIterable {
         }
     }
 
+    /// Whether this action can cycle across monitors when repeated
+    var hasCycleDirection: Bool {
+        switch self {
+        case .leftHalf, .rightHalf, .topLeft, .topRight, .bottomLeft, .bottomRight,
+             .leftThird, .rightThird, .leftTwoThirds, .rightTwoThirds:
+            return true
+        default:
+            return false
+        }
+    }
+
     var category: String {
         switch self {
         case .leftHalf, .rightHalf, .topHalf, .bottomHalf: return "Halves"
