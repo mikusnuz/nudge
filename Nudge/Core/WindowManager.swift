@@ -195,6 +195,7 @@ final class WindowManager {
     }
 
     /// Mirror an action horizontally (right↔left, keeping top/bottom)
+    /// For top/bottom half: keep the same shape on the next monitor
     private func mirrorAction(_ action: SnapAction) -> SnapAction {
         switch action {
         case .leftHalf: return .rightHalf
@@ -207,21 +208,20 @@ final class WindowManager {
         case .rightThird: return .leftThird
         case .leftTwoThirds: return .rightTwoThirds
         case .rightTwoThirds: return .leftTwoThirds
-        // These don't mirror
-        case .centerThird: return .centerThird
+        // Top/bottom half: keep same shape when crossing monitors
         case .topHalf: return .topHalf
         case .bottomHalf: return .bottomHalf
-        case .maximize: return .maximize
         default: return action
         }
     }
 
     /// Right-side actions cycle right, left-side actions cycle left
+    /// Bottom half cycles right (like rightHalf), top half cycles left (like leftHalf)
     private func cycleDirection(for action: SnapAction) -> Int {
         switch action {
-        case .rightHalf, .topRight, .bottomRight, .rightThird, .rightTwoThirds:
+        case .rightHalf, .topRight, .bottomRight, .rightThird, .rightTwoThirds, .bottomHalf:
             return 1
-        case .leftHalf, .topLeft, .bottomLeft, .leftThird, .leftTwoThirds:
+        case .leftHalf, .topLeft, .bottomLeft, .leftThird, .leftTwoThirds, .topHalf:
             return -1
         default:
             return 1

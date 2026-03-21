@@ -38,6 +38,9 @@ struct SnapZone {
         case .leftTwoThirds:
             let thirdW = floor(f.width / 3)
             return CGRect(x: f.minX, y: f.minY, width: thirdW * 2, height: f.height)
+        case .centerTwoThirds:
+            let sixthW = floor(f.width / 6)
+            return CGRect(x: f.minX + sixthW, y: f.minY, width: f.width - sixthW * 2, height: f.height)
         case .rightTwoThirds:
             let thirdW = floor(f.width / 3)
             return CGRect(x: f.minX + thirdW, y: f.minY, width: f.width - thirdW, height: f.height)

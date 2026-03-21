@@ -13,7 +13,7 @@ final class SnapActionTests: XCTestCase {
         }
     }
     func testActionCount() {
-        XCTAssertEqual(SnapAction.allCases.count, 18)
+        XCTAssertEqual(SnapAction.allCases.count, 19)
     }
     func testCategoriesAreValid() {
         let valid = ["Halves", "Quarters", "Thirds", "Two Thirds", "Other", "Display"]

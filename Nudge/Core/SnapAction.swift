@@ -5,7 +5,7 @@ enum SnapAction: String, CaseIterable {
     case leftHalf, rightHalf, topHalf, bottomHalf
     case topLeft, topRight, bottomLeft, bottomRight
     case leftThird, centerThird, rightThird
-    case leftTwoThirds, rightTwoThirds
+    case leftTwoThirds, centerTwoThirds, rightTwoThirds
     case maximize, center, restore
     case nextDisplay, previousDisplay
 
@@ -23,6 +23,7 @@ enum SnapAction: String, CaseIterable {
         case .centerThird: return "Center Third"
         case .rightThird: return "Right Third"
         case .leftTwoThirds: return "Left Two Thirds"
+        case .centerTwoThirds: return "Center Two Thirds"
         case .rightTwoThirds: return "Right Two Thirds"
         case .maximize: return "Maximize"
         case .center: return "Center"
@@ -36,23 +37,24 @@ enum SnapAction: String, CaseIterable {
         let ctrlOpt: UInt32 = UInt32(controlKey | optionKey)
         let ctrlOptCmd: UInt32 = UInt32(controlKey | optionKey | cmdKey)
         switch self {
-        case .leftHalf:       return (ctrlOpt, UInt32(kVK_LeftArrow))
-        case .rightHalf:      return (ctrlOpt, UInt32(kVK_RightArrow))
-        case .topHalf:        return (ctrlOpt, UInt32(kVK_UpArrow))
-        case .bottomHalf:     return (ctrlOpt, UInt32(kVK_DownArrow))
-        case .topLeft:        return (ctrlOpt, UInt32(kVK_ANSI_U))
-        case .topRight:       return (ctrlOpt, UInt32(kVK_ANSI_I))
-        case .bottomLeft:     return (ctrlOpt, UInt32(kVK_ANSI_J))
-        case .bottomRight:    return (ctrlOpt, UInt32(kVK_ANSI_K))
-        case .leftThird:      return (ctrlOpt, UInt32(kVK_ANSI_D))
-        case .centerThird:    return (ctrlOpt, UInt32(kVK_ANSI_F))
-        case .rightThird:     return (ctrlOpt, UInt32(kVK_ANSI_G))
-        case .leftTwoThirds:  return (ctrlOpt, UInt32(kVK_ANSI_E))
-        case .rightTwoThirds: return (ctrlOpt, UInt32(kVK_ANSI_T))
-        case .maximize:       return (ctrlOpt, UInt32(kVK_Return))
-        case .center:         return (ctrlOpt, UInt32(kVK_ANSI_C))
-        case .restore:        return (ctrlOpt, UInt32(kVK_Delete))
-        case .nextDisplay:    return (ctrlOptCmd, UInt32(kVK_RightArrow))
+        case .leftHalf:        return (ctrlOpt, UInt32(kVK_LeftArrow))
+        case .rightHalf:       return (ctrlOpt, UInt32(kVK_RightArrow))
+        case .topHalf:         return (ctrlOpt, UInt32(kVK_UpArrow))
+        case .bottomHalf:      return (ctrlOpt, UInt32(kVK_DownArrow))
+        case .topLeft:         return (ctrlOpt, UInt32(kVK_ANSI_U))
+        case .topRight:        return (ctrlOpt, UInt32(kVK_ANSI_I))
+        case .bottomLeft:      return (ctrlOpt, UInt32(kVK_ANSI_J))
+        case .bottomRight:     return (ctrlOpt, UInt32(kVK_ANSI_K))
+        case .leftThird:       return (ctrlOpt, UInt32(kVK_ANSI_D))
+        case .centerThird:     return (ctrlOpt, UInt32(kVK_ANSI_F))
+        case .rightThird:      return (ctrlOpt, UInt32(kVK_ANSI_G))
+        case .leftTwoThirds:   return (ctrlOpt, UInt32(kVK_ANSI_E))
+        case .centerTwoThirds: return (ctrlOpt, UInt32(kVK_ANSI_R))
+        case .rightTwoThirds:  return (ctrlOpt, UInt32(kVK_ANSI_T))
+        case .maximize:        return (ctrlOpt, UInt32(kVK_Return))
+        case .center:          return (ctrlOpt, UInt32(kVK_ANSI_C))
+        case .restore:         return (ctrlOpt, UInt32(kVK_Delete))
+        case .nextDisplay:     return (ctrlOptCmd, UInt32(kVK_RightArrow))
         case .previousDisplay: return (ctrlOptCmd, UInt32(kVK_LeftArrow))
         }
     }
@@ -60,7 +62,8 @@ enum SnapAction: String, CaseIterable {
     /// Whether this action can cycle across monitors when repeated
     var hasCycleDirection: Bool {
         switch self {
-        case .leftHalf, .rightHalf, .topLeft, .topRight, .bottomLeft, .bottomRight,
+        case .leftHalf, .rightHalf, .topHalf, .bottomHalf,
+             .topLeft, .topRight, .bottomLeft, .bottomRight,
              .leftThird, .rightThird, .leftTwoThirds, .rightTwoThirds:
             return true
         default:
@@ -73,7 +76,7 @@ enum SnapAction: String, CaseIterable {
         case .leftHalf, .rightHalf, .topHalf, .bottomHalf: return "Halves"
         case .topLeft, .topRight, .bottomLeft, .bottomRight: return "Quarters"
         case .leftThird, .centerThird, .rightThird: return "Thirds"
-        case .leftTwoThirds, .rightTwoThirds: return "Two Thirds"
+        case .leftTwoThirds, .centerTwoThirds, .rightTwoThirds: return "Two Thirds"
         case .maximize, .center, .restore: return "Other"
         case .nextDisplay, .previousDisplay: return "Display"
         }

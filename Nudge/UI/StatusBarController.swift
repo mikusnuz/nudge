@@ -116,6 +116,7 @@ final class StatusBarController {
         case kVK_ANSI_F: return "F"
         case kVK_ANSI_G: return "G"
         case kVK_ANSI_E: return "E"
+        case kVK_ANSI_R: return "R"
         case kVK_ANSI_T: return "T"
         case kVK_ANSI_C: return "C"
         default: return "?"
