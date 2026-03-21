@@ -10,15 +10,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarController = StatusBarController()
         statusBarController.setup()
 
-        // Then check accessibility and start engines
-        if AccessibilityHelper.shared.isAccessibilityGranted {
-            startEngines()
-        } else {
-            NSApp.activate(ignoringOtherApps: true)
-            AccessibilityHelper.shared.checkAndRequestAccess { [weak self] granted in
-                guard granted else { return }
-                DispatchQueue.main.async {
-                    self?.startEngines()
+        // Check accessibility after a brief delay to let menu bar render
+        DispatchQueue.main.async { [weak self] in
+            if AccessibilityHelper.shared.isAccessibilityGranted {
+                self?.startEngines()
+            } else {
+                NSApp.activate(ignoringOtherApps: true)
+                AccessibilityHelper.shared.checkAndRequestAccess { granted in
+                    guard granted else { return }
+                    DispatchQueue.main.async {
+                        self?.startEngines()
+                    }
                 }
             }
         }
