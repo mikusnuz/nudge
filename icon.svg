@@ -15,12 +15,12 @@
   <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228" fill="url(#bg)"/>
   <rect x="0" y="0" width="1024" height="512" rx="228" ry="228" fill="url(#glass)"/>
 
-  <!-- Left half pane (active/white) -->
-  <rect x="148" y="208" width="340" height="608" rx="24" ry="24" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
+  <!-- Left top pane -->
+  <rect x="148" y="208" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
 
-  <!-- Right top pane -->
-  <rect x="528" y="208" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+  <!-- Left bottom pane -->
+  <rect x="148" y="532" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
 
-  <!-- Right bottom pane -->
-  <rect x="528" y="532" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+  <!-- Right half pane (active/white) -->
+  <rect x="536" y="208" width="340" height="608" rx="24" ry="24" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
 </svg>
