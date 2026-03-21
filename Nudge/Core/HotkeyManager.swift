@@ -7,22 +7,40 @@ final class HotkeyManager {
     private var actionMap: [UInt32: SnapAction] = [:]
     private var nextID: UInt32 = 1
     private var lastActionTime: Date = .distantPast
-    private let debounceInterval: TimeInterval = 0.15
-    var isPaused = false
+    private var lastAction: SnapAction?
+    private let debounceInterval: TimeInterval = 0.3
+    private var isRunning = false
 
     func start() {
+        guard !isRunning else { return }
+        isRunning = true
         installEventHandler()
         registerAllHotkeys()
     }
 
     func stop() {
+        guard isRunning else { return }
+        isRunning = false
         unregisterAllHotkeys()
     }
 
     func reloadHotkeys() {
+        let wasRunning = isRunning
+        if wasRunning { unregisterAllHotkeys() }
+        if wasRunning { registerAllHotkeys() }
+    }
+
+    /// Temporarily disable all hotkeys (for shortcut recording)
+    func pause() {
         unregisterAllHotkeys()
+    }
+
+    /// Re-enable all hotkeys
+    func resume() {
         registerAllHotkeys()
     }
+
+    // MARK: - Carbon Event Handler
 
     private func installEventHandler() {
         var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
@@ -36,16 +54,20 @@ final class HotkeyManager {
     }
 
     private func handleHotkey(id: UInt32) {
-        guard !isPaused else { return }
         guard let action = actionMap[id] else { return }
 
-        // Debounce — ignore if fired within 150ms of last action
+        // Debounce — prevent key repeat from firing multiple times
         let now = Date()
-        guard now.timeIntervalSince(lastActionTime) > debounceInterval else { return }
+        if now.timeIntervalSince(lastActionTime) < debounceInterval && lastAction == action {
+            return
+        }
         lastActionTime = now
+        lastAction = action
 
         WindowManager.shared.performAction(action)
     }
+
+    // MARK: - Registration
 
     private func registerAllHotkeys() {
         for action in SnapAction.allCases {

@@ -80,6 +80,7 @@ final class PreferencesWindow: NSWindowController {
             contentView.addSubview(label)
 
             let recorder = KeyRecorderView(frame: NSRect(x: 230, y: y, width: 160, height: 24))
+            recorder.identifier = NSUserInterfaceItemIdentifier("recorder-\(index)")
             let hotkey = UserPreferences.shared.hotkey(for: action)
             recorder.setShortcut(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
             recorder.onRecorded = { modifiers, keyCode in
@@ -88,10 +89,12 @@ final class PreferencesWindow: NSWindowController {
             }
             contentView.addSubview(recorder)
 
-            let resetBtn = NSButton(title: "Reset", target: self, action: #selector(resetShortcut(_:)))
+            let resetBtn = NSButton(title: "Reset", target: nil, action: nil)
             resetBtn.bezelStyle = .inline
             resetBtn.frame = NSRect(x: 400, y: y, width: 50, height: 24)
             resetBtn.tag = index
+            resetBtn.target = self
+            resetBtn.action = #selector(resetShortcut(_:))
             contentView.addSubview(resetBtn)
         }
 
@@ -100,12 +103,21 @@ final class PreferencesWindow: NSWindowController {
     }
 
     @objc private func resetShortcut(_ sender: NSButton) {
-        let action = SnapAction.allCases[sender.tag]
+        let index = sender.tag
+        let action = SnapAction.allCases[index]
         UserPreferences.shared.resetHotkey(for: action)
         HotkeyManager.shared.reloadHotkeys()
-        // Refresh shortcuts tab
-        if tabView.numberOfTabViewItems > 1 {
-            tabView.tabViewItem(at: 1).view = makeShortcutsView()
+
+        // Update only the affected KeyRecorderView, don't rebuild the whole view
+        guard let scrollView = tabView.tabViewItem(at: 1).view as? NSScrollView,
+              let contentView = scrollView.documentView else { return }
+        let recorderID = NSUserInterfaceItemIdentifier("recorder-\(index)")
+        for subview in contentView.subviews {
+            if let recorder = subview as? KeyRecorderView, recorder.identifier == recorderID {
+                let hotkey = action.defaultHotkey
+                recorder.setShortcut(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
+                break
+            }
         }
     }
 }

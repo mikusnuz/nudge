@@ -92,7 +92,7 @@ final class KeyRecorderView: NSView {
 
     private func startRecording() {
         isRecording = true
-        HotkeyManager.shared.isPaused = true
+        HotkeyManager.shared.pause()
         displayLabel.stringValue = "Type shortcut..."
         displayLabel.font = .systemFont(ofSize: 12)
         layer?.borderColor = NSColor.systemBlue.cgColor
@@ -102,11 +102,11 @@ final class KeyRecorderView: NSView {
 
     private func stopRecording() {
         isRecording = false
-        HotkeyManager.shared.isPaused = false
         displayLabel.font = .monospacedSystemFont(ofSize: 13, weight: .medium)
         layer?.borderColor = NSColor.separatorColor.cgColor
         layer?.borderWidth = 1
         if currentModifiers == 0 { displayLabel.stringValue = "" }
+        HotkeyManager.shared.resume()
     }
 
     @objc private func clearShortcut() {
