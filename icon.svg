@@ -4,23 +4,17 @@
       <stop offset="0%" stop-color="#4A90D9"/>
       <stop offset="100%" stop-color="#2563EB"/>
     </linearGradient>
-    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
-      <stop offset="50%" stop-color="rgba(255,255,255,0.05)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-    </linearGradient>
   </defs>
 
   <!-- Background -->
   <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1024" height="512" rx="228" ry="228" fill="url(#glass)"/>
 
   <!-- Left top pane -->
-  <rect x="148" y="208" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+  <rect x="148" y="148" width="340" height="340" rx="32" ry="32" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
 
   <!-- Left bottom pane -->
-  <rect x="148" y="532" width="348" height="284" rx="24" ry="24" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+  <rect x="148" y="536" width="340" height="340" rx="32" ry="32" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.6)" stroke-width="4"/>
 
-  <!-- Right half pane (active/white) -->
-  <rect x="536" y="208" width="340" height="608" rx="24" ry="24" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
+  <!-- Right half pane (active) -->
+  <rect x="536" y="148" width="340" height="728" rx="32" ry="32" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,1)" stroke-width="4"/>
 </svg>
