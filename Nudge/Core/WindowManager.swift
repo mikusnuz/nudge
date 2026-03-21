@@ -208,9 +208,9 @@ final class WindowManager {
         case .rightThird: return .leftThird
         case .leftTwoThirds: return .rightTwoThirds
         case .rightTwoThirds: return .leftTwoThirds
-        // Top/bottom half: keep same shape when crossing monitors
-        case .topHalf: return .topHalf
-        case .bottomHalf: return .bottomHalf
+        // Top/bottom half: mirror vertically when crossing monitors
+        case .topHalf: return .bottomHalf
+        case .bottomHalf: return .topHalf
         default: return action
         }
     }
