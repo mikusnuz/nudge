@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 14">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   <!-- Left top pane -->
-  <rect x="1" y="1" width="9" height="5.5" rx="1" ry="1" fill="black" opacity="0.5"/>
+  <rect x="0.5" y="0.5" width="7" height="7" rx="1.2" ry="1.2" fill="black" opacity="0.5"/>
   <!-- Left bottom pane -->
-  <rect x="1" y="7.5" width="9" height="5.5" rx="1" ry="1" fill="black" opacity="0.5"/>
+  <rect x="0.5" y="8.5" width="7" height="7" rx="1.2" ry="1.2" fill="black" opacity="0.5"/>
   <!-- Right half pane (active) -->
-  <rect x="11" y="1" width="9" height="12" rx="1" ry="1" fill="black"/>
+  <rect x="8.5" y="0.5" width="7" height="15" rx="1.2" ry="1.2" fill="black"/>
 </svg>
