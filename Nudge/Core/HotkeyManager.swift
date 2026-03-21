@@ -6,6 +6,9 @@ final class HotkeyManager {
     private var hotkeyRefs: [EventHotKeyRef] = []
     private var actionMap: [UInt32: SnapAction] = [:]
     private var nextID: UInt32 = 1
+    private var lastActionTime: Date = .distantPast
+    private let debounceInterval: TimeInterval = 0.15
+    var isPaused = false
 
     func start() {
         installEventHandler()
@@ -33,7 +36,14 @@ final class HotkeyManager {
     }
 
     private func handleHotkey(id: UInt32) {
+        guard !isPaused else { return }
         guard let action = actionMap[id] else { return }
+
+        // Debounce — ignore if fired within 150ms of last action
+        let now = Date()
+        guard now.timeIntervalSince(lastActionTime) > debounceInterval else { return }
+        lastActionTime = now
+
         WindowManager.shared.performAction(action)
     }
 
