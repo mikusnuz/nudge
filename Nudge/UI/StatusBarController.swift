@@ -79,6 +79,14 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         addSnapItem(menu, .restore)
         menu.addItem(.separator())
 
+        // Accessibility permission
+        if !AccessibilityHelper.shared.isAccessibilityGranted {
+            let permItem = NSMenuItem(title: "⚠ Grant Accessibility Permission", action: #selector(openAccessibilitySettings), keyEquivalent: "")
+            permItem.target = self
+            menu.addItem(permItem)
+            menu.addItem(.separator())
+        }
+
         // Settings
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openPreferences), keyEquivalent: ",")
         settingsItem.target = self
@@ -97,6 +105,11 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             menu.addItem(ignoreItem)
             menu.addItem(.separator())
         }
+
+        // Sponsor
+        let sponsorItem = NSMenuItem(title: "Support Nudge ♥", action: #selector(openSponsor), keyEquivalent: "")
+        sponsorItem.target = self
+        menu.addItem(sponsorItem)
 
         // About / Quit
         let aboutItem = NSMenuItem(title: "About Nudge", action: #selector(showAbout), keyEquivalent: "")
@@ -159,6 +172,14 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         }
         preferencesWindow?.showWindow(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func openAccessibilitySettings() {
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+    }
+
+    @objc private func openSponsor() {
+        NSWorkspace.shared.open(URL(string: "https://github.com/sponsors/mikusnuz")!)
     }
 
     @objc private func showAbout() {

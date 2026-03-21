@@ -12,8 +12,20 @@ final class PreferencesWindow: NSWindowController {
         )
         window.title = "Nudge Preferences"
         window.center()
+        window.isReleasedWhenClosed = false
         self.init(window: window)
         setupTabs()
+
+        // Enable ⌘W to close
+        let closeItem = NSMenuItem(title: "Close", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        let fileMenu = NSMenu(title: "File")
+        fileMenu.addItem(closeItem)
+        let fileMenuItem = NSMenuItem(title: "File", action: nil, keyEquivalent: "")
+        fileMenuItem.submenu = fileMenu
+        if NSApp.mainMenu == nil {
+            NSApp.mainMenu = NSMenu()
+        }
+        NSApp.mainMenu?.addItem(fileMenuItem)
     }
 
     private func setupTabs() {

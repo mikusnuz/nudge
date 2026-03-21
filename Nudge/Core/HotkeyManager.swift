@@ -7,12 +7,15 @@ final class HotkeyManager {
     private var actionMap: [UInt32: SnapAction] = [:]
     private var nextID: UInt32 = 1
     private var isRunning = false
-    private var isPerforming = false
+    private var handlerInstalled = false
 
     func start() {
         guard !isRunning else { return }
         isRunning = true
-        installEventHandler()
+        if !handlerInstalled {
+            installEventHandler()
+            handlerInstalled = true
+        }
         registerAllHotkeys()
     }
 
@@ -42,27 +45,17 @@ final class HotkeyManager {
         let handler: EventHandlerUPP = { _, event, _ -> OSStatus in
             var hotKeyID = EventHotKeyID()
             GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, MemoryLayout<EventHotKeyID>.size, nil, &hotKeyID)
-            HotkeyManager.shared.handleHotkey(id: hotKeyID.id)
+            DispatchQueue.main.async {
+                HotkeyManager.shared.handleHotkey(id: hotKeyID.id)
+            }
             return noErr
         }
         InstallEventHandler(GetApplicationEventTarget(), handler, 1, &eventType, nil, nil)
     }
 
     private func handleHotkey(id: UInt32) {
-        // Prevent re-entry — if an action is in progress, ignore
-        guard !isPerforming else { return }
         guard let action = actionMap[id] else { return }
-
-        isPerforming = true
-
-        DispatchQueue.main.async {
-            WindowManager.shared.performAction(action)
-
-            // Block further actions for 200ms to prevent double-fire
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                self.isPerforming = false
-            }
-        }
+        WindowManager.shared.performAction(action)
     }
 
     // MARK: - Registration

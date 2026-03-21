@@ -5,6 +5,9 @@ final class WindowManager {
     static let shared = WindowManager()
 
     private var previousFrames: [String: CGRect] = [:]
+    /// Track the last frame we just snapped to — prevents false "already there" detection on rapid calls
+    private var lastSnappedFrame: CGRect?
+    private var lastSnappedTime: Date = .distantPast
 
     // MARK: - Get Focused Window
 
@@ -158,11 +161,12 @@ final class WindowManager {
         }
 
         // Check if window is ALREADY at the target snap position on this screen
+        // But skip this check if we JUST snapped to this position (prevents double-fire)
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgTarget = convertToCG(nsFrame: targetFrame, screen: currentScreen)
-            if isFrameMatch(currentFrame, cgTarget) {
+            let justSnapped = lastSnappedFrame != nil && isFrameMatch(cgTarget, lastSnappedFrame!) && Date().timeIntervalSince(lastSnappedTime) < 0.5
+            if isFrameMatch(currentFrame, cgTarget) && !justSnapped {
                 // Already there
-                // maximize, topHalf, bottomHalf, centerThird: no cycling, do nothing
                 if !action.hasCycleDirection {
                     return
                 }
@@ -176,6 +180,8 @@ final class WindowManager {
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgFrame = convertToCG(nsFrame: targetFrame, screen: currentScreen)
             move(window: window, to: cgFrame)
+            lastSnappedFrame = cgFrame
+            lastSnappedTime = Date()
         }
     }
 
@@ -201,6 +207,8 @@ final class WindowManager {
         if let targetFrame = SnapZone.frame(for: mirroredAction, on: nextScreen) {
             let cgFrame = convertToCG(nsFrame: targetFrame, screen: nextScreen)
             move(window: window, to: cgFrame)
+            lastSnappedFrame = cgFrame
+            lastSnappedTime = Date()
         }
     }
 
