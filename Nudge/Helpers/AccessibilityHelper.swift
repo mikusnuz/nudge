@@ -9,29 +9,23 @@ final class AccessibilityHelper {
         return AXIsProcessTrusted()
     }
 
-    func checkAndRequestAccess(completion: @escaping (Bool) -> Void) {
+    /// Request accessibility using the system prompt (no custom alert needed)
+    func requestAccessAndPoll(completion: @escaping (Bool) -> Void) {
         if isAccessibilityGranted {
             completion(true)
             return
         }
-        let alert = NSAlert()
-        alert.messageText = "Accessibility Access Required"
-        alert.informativeText = "Nudge needs accessibility access to move and resize windows. Please grant access in System Settings > Privacy & Security > Accessibility."
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Quit")
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            openAccessibilitySettings()
-            startPolling(completion: completion)
-        } else {
-            NSApp.terminate(nil)
-        }
-    }
 
-    private func openAccessibilitySettings() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-        NSWorkspace.shared.open(url)
+        // This triggers the macOS system accessibility prompt automatically
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        let trusted = AXIsProcessTrustedWithOptions(options)
+
+        if trusted {
+            completion(true)
+        } else {
+            // Poll until user grants permission
+            startPolling(completion: completion)
+        }
     }
 
     private func startPolling(completion: @escaping (Bool) -> Void) {
