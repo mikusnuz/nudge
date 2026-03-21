@@ -23,6 +23,7 @@
 		E7D19AECD271724EBF00359E /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94958E79F696A47AFE35453 /* HotkeyManager.swift */; };
 		EFA09A06F2C0A8B9EAADBD25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD61E0B5184F594FAACB7628 /* AppDelegate.swift */; };
 		F6368D66B74679CC63ADEE3C /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD4EA8C359F6394C3B78DBD /* PreferencesWindow.swift */; };
+		FF59BC71041F091E9F5D6DE3 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD03E252863E66AC5FFD93F /* main.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,7 @@
 
 /* Begin PBXFileReference section */
 		1530B006B4B46598CB828806 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1CD03E252863E66AC5FFD93F /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1DDCAA75D7385ECAD476425C /* SnapAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapAction.swift; sourceTree = "<group>"; };
 		2BE29C012FD7CBDF9229AEE6 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		31FEE976A494EF28079ED9FF /* SnapActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapActionTests.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 			children = (
 				FD61E0B5184F594FAACB7628 /* AppDelegate.swift */,
 				1530B006B4B46598CB828806 /* Info.plist */,
+				1CD03E252863E66AC5FFD93F /* main.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 				65A59ED455AA9AEB9683A2F1 /* StatusBarController.swift in Sources */,
 				54843A40C0A5530ADB2BF2BD /* UserPreferences.swift in Sources */,
 				0E31B07398367CC729EAB9D7 /* WindowManager.swift in Sources */,
+				FF59BC71041F091E9F5D6DE3 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
