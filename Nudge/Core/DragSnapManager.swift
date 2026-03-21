@@ -11,9 +11,10 @@ final class DragSnapManager {
     private var currentSnapAction: SnapAction?
     private var draggedWindow: AXUIElement?
     private var dragEventCount = 0
+    private var didRestoreFromSnap = false
 
-    private let edgeThreshold: CGFloat = 15
-    private let cornerRadius: CGFloat = 80
+    private let edgeThreshold: CGFloat = 50
+    private let cornerRadius: CGFloat = 150
 
     func start() {
         guard UserPreferences.shared.dragSnapEnabled else { return }
@@ -55,7 +56,6 @@ final class DragSnapManager {
 
     private func handleDrag(cursorPosition: CGPoint) {
         if !isDraggingWindow {
-            // First drag event — capture the focused window
             guard let window = WindowManager.shared.getFocusedWindow(),
                   let windowPos = WindowManager.shared.getPosition(of: window) else { return }
             dragStartWindowPosition = windowPos
@@ -63,15 +63,14 @@ final class DragSnapManager {
             draggedWindow = window
             isDraggingWindow = true
             dragEventCount = 0
+            didRestoreFromSnap = false
             return
         }
 
         dragEventCount += 1
-
-        // Skip first few events to let the drag stabilize
         if dragEventCount < 3 { return }
 
-        // Check if this is actually a window drag (window moves with cursor)
+        // On 3rd event, check if it's actually a window drag
         if dragEventCount == 3 {
             guard let window = draggedWindow,
                   let currentWindowPos = WindowManager.shared.getPosition(of: window),
@@ -84,14 +83,22 @@ final class DragSnapManager {
             let windowDelta = hypot(currentWindowPos.x - startWindowPos.x, currentWindowPos.y - startWindowPos.y)
             let cursorDelta = hypot(cursorPosition.x - startCursorPos.x, cursorPosition.y - startCursorPos.y)
 
-            // If cursor moved but window didn't, it's not a window drag (text selection etc)
             if cursorDelta > 30 && windowDelta < 5 {
                 resetDragState()
                 return
             }
+
+            // If window was snapped (has previous frame), restore it on drag start
+            if !didRestoreFromSnap && WindowManager.shared.hasPreviousFrame(for: window) {
+                didRestoreFromSnap = true
+                DispatchQueue.main.async {
+                    WindowManager.shared.restoreWindow(window)
+                }
+                return
+            }
         }
 
-        // Detect snap zone based on cursor position
+        // Detect snap zone
         let detectedAction = detectSnapZone(cursor: cursorPosition)
 
         if detectedAction != currentSnapAction {
@@ -140,9 +147,6 @@ final class DragSnapManager {
     // MARK: - Zone Detection
 
     func detectSnapZone(cursor: CGPoint) -> SnapAction? {
-        // CGEvent cursor uses CG coordinates (top-left origin)
-        // NSScreen.frame also uses a global coordinate system where (0,0) is bottom-left of main screen
-        // We need to convert cursor CG coords to NS coords for comparison
         guard let mainScreen = NSScreen.screens.first else { return nil }
         let mainHeight = mainScreen.frame.height
         let nsCursor = CGPoint(x: cursor.x, y: mainHeight - cursor.y)
@@ -158,20 +162,17 @@ final class DragSnapManager {
         let nearLeft = distLeft < edgeThreshold
         let nearRight = distRight < edgeThreshold
         let nearTop = distTop < edgeThreshold
-        let nearBottom = distBottom < edgeThreshold
 
         let inCornerLeft = distLeft < cornerRadius
         let inCornerRight = distRight < cornerRadius
         let inCornerTop = distTop < cornerRadius
         let inCornerBottom = distBottom < cornerRadius
 
-        // Corners (priority over edges)
+        // Corners first (priority)
         if nearTop && inCornerLeft { return .topLeft }
         if nearTop && inCornerRight { return .topRight }
         if nearLeft && inCornerTop { return .topLeft }
         if nearRight && inCornerTop { return .topRight }
-        if (nearBottom || nearLeft) && inCornerLeft && inCornerBottom { return .bottomLeft }
-        if (nearBottom || nearRight) && inCornerRight && inCornerBottom { return .bottomRight }
         if nearLeft && inCornerBottom { return .bottomLeft }
         if nearRight && inCornerBottom { return .bottomRight }
 
@@ -179,7 +180,6 @@ final class DragSnapManager {
         if nearLeft { return .leftHalf }
         if nearRight { return .rightHalf }
         if nearTop { return .maximize }
-        // Bottom edge NOT mapped (Dock conflict)
 
         return nil
     }
@@ -206,5 +206,6 @@ final class DragSnapManager {
         currentSnapAction = nil
         draggedWindow = nil
         dragEventCount = 0
+        didRestoreFromSnap = false
     }
 }
