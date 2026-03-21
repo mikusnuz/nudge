@@ -1,0 +1,48 @@
+name: Nudge
+options:
+  bundleIdPrefix: app.nudge
+  deploymentTarget:
+    macOS: "11.0"
+  xcodeVersion: "15.0"
+  minimumXcodeGenVersion: "2.35"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "11.0"
+    CODE_SIGN_IDENTITY: "-"
+    PRODUCT_BUNDLE_IDENTIFIER: app.nudge.Nudge
+    INFOPLIST_FILE: Nudge/App/Info.plist
+    ENABLE_APP_SANDBOX: false
+targets:
+  Nudge:
+    type: application
+    platform: macOS
+    sources:
+      - path: Nudge
+    settings:
+      base:
+        INFOPLIST_FILE: Nudge/App/Info.plist
+        ENABLE_APP_SANDBOX: false
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+    info:
+      path: Nudge/App/Info.plist
+      properties:
+        LSUIElement: true
+        CFBundleName: Nudge
+        CFBundleDisplayName: Nudge
+        CFBundleIdentifier: app.nudge.Nudge
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        NSAccessibilityUsageDescription: "Nudge needs accessibility access to move and resize windows."
+        LSMinimumSystemVersion: "11.0"
+  NudgeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: NudgeTests
+    dependencies:
+      - target: Nudge
+    settings:
+      base:
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Nudge.app/Contents/MacOS/Nudge"
+        BUNDLE_LOADER: "$(TEST_HOST)"
