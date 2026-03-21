@@ -19,6 +19,8 @@ targets:
     platform: macOS
     sources:
       - path: Nudge
+    attributes:
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     settings:
       base:
         INFOPLIST_FILE: Nudge/App/Info.plist
