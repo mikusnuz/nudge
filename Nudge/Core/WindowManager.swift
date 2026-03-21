@@ -98,21 +98,49 @@ final class WindowManager {
                abs(frame.height - visibleCG.height) < 20
     }
 
-    /// Restore a maximized window to ~70% of screen size, centered
-    func restoreFromMaximized(_ window: AXUIElement) {
+    /// Restore a maximized window to ~70% of screen size, positioned so title bar is at cursor
+    func restoreFromMaximized(_ window: AXUIElement, cursorCG: CGPoint? = nil) {
         guard let frame = getFrame(of: window) else { return }
         let screen = DisplayHelper.shared.currentScreen(for: frame)
         let visible = screen.visibleFrame
         let newWidth = visible.width * 0.7
         let newHeight = visible.height * 0.7
-        let nsOrigin = CGPoint(
-            x: visible.minX + (visible.width - newWidth) / 2,
-            y: visible.minY + (visible.height - newHeight) / 2
-        )
-        guard let mainScreen = NSScreen.screens.first else { return }
-        let cgY = mainScreen.frame.height - nsOrigin.y - newHeight
+
+        // Position window so the title bar is at the cursor position
+        // CG coordinates: (0,0) = top-left, y increases downward
+        let cgX: CGFloat
+        let cgY: CGFloat
+
+        if let cursor = cursorCG {
+            // Center horizontally on cursor, top edge at cursor Y
+            cgX = cursor.x - newWidth / 2
+            cgY = cursor.y
+        } else {
+            // Fallback: center on screen
+            guard let mainScreen = NSScreen.screens.first else { return }
+            let nsOriginX = visible.minX + (visible.width - newWidth) / 2
+            let nsOriginY = visible.minY + (visible.height - newHeight) / 2
+            cgX = nsOriginX
+            cgY = mainScreen.frame.height - nsOriginY - newHeight
+        }
+
         setSize(of: window, to: CGSize(width: newWidth, height: newHeight))
-        setPosition(of: window, to: CGPoint(x: nsOrigin.x, y: cgY))
+        setPosition(of: window, to: CGPoint(x: cgX, y: cgY))
+    }
+
+    /// Restore Nudge-snapped window, positioned so title bar is at cursor
+    func restoreWindowAtCursor(_ window: AXUIElement, cursorCG: CGPoint) {
+        guard let windowID = getWindowID(of: window),
+              let previousFrame = previousFrames[windowID] else { return }
+        let prevSize = previousFrame.size
+        // Center horizontally on cursor, top edge at cursor Y
+        let cgX = cursorCG.x - prevSize.width / 2
+        let cgY = cursorCG.y
+        setPosition(of: window, to: CGPoint(x: cgX, y: cgY))
+        setSize(of: window, to: prevSize)
+        previousFrames.removeValue(forKey: windowID)
+        lastSnapAction.removeValue(forKey: windowID)
+        lastSnapScreen.removeValue(forKey: windowID)
     }
 
     // MARK: - Snap Actions

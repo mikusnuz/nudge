@@ -88,19 +88,18 @@ final class DragSnapManager {
                 return
             }
 
-            // Restore from snap or maximized state on drag
+            // Restore from snap or maximized state on drag — position title bar at cursor
             if !didRestoreFromSnap {
                 didRestoreFromSnap = true
+                let cursor = cursorPosition // CG coordinates
                 if WindowManager.shared.hasPreviousFrame(for: window) {
-                    // Was snapped by Nudge — restore previous size
                     DispatchQueue.main.async {
-                        WindowManager.shared.restoreWindow(window)
+                        WindowManager.shared.restoreWindowAtCursor(window, cursorCG: cursor)
                     }
                     return
                 } else if WindowManager.shared.isWindowMaximized(window) {
-                    // Maximized by system or other means — restore to 70% centered
                     DispatchQueue.main.async {
-                        WindowManager.shared.restoreFromMaximized(window)
+                        WindowManager.shared.restoreFromMaximized(window, cursorCG: cursor)
                     }
                     return
                 }
