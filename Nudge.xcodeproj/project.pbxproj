@@ -17,6 +17,7 @@
 		7B542C6EB6278E0047D6439E /* SnapOverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */; };
 		909BCD93AFD46C773D5E71DB /* SnapZoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16D4E4EF90EFC59610EE29C /* SnapZoneTests.swift */; };
 		95D933E09487CFF3879AB788 /* SnapZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ABE84E0BA0C6951989EE5D /* SnapZone.swift */; };
+		968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */; };
 		AF7E495CC449C994537F5588 /* DisplayHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */; };
 		DE3533CA56943B3B261376A0 /* SnapAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDCAA75D7385ECAD476425C /* SnapAction.swift */; };
 		E7D19AECD271724EBF00359E /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94958E79F696A47AFE35453 /* HotkeyManager.swift */; };
@@ -43,6 +44,7 @@
 		50361DA1FBA39934BD3333ED /* Nudge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nudge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B6D5547BAC8324EC7CE56B8 /* DragSnapZoneDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragSnapZoneDetectionTests.swift; sourceTree = "<group>"; };
 		7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapOverlayWindow.swift; sourceTree = "<group>"; };
+		9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRecorderView.swift; sourceTree = "<group>"; };
 		9FF5452511B5430A6199287E /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		B4BC0DF7C25F6B121DB9C7F2 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		B8737084F2E2A1667E9F1489 /* AccessibilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityHelper.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 		8D2ECE0B9702BB2B5AD19A25 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */,
 				DDD4EA8C359F6394C3B78DBD /* PreferencesWindow.swift */,
 				7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */,
 				B4BC0DF7C25F6B121DB9C7F2 /* StatusBarController.swift */,
@@ -223,6 +226,7 @@
 				AF7E495CC449C994537F5588 /* DisplayHelper.swift in Sources */,
 				71EC31D05E3F050EDC6214D5 /* DragSnapManager.swift in Sources */,
 				E7D19AECD271724EBF00359E /* HotkeyManager.swift in Sources */,
+				968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */,
 				F6368D66B74679CC63ADEE3C /* PreferencesWindow.swift in Sources */,
 				DE3533CA56943B3B261376A0 /* SnapAction.swift in Sources */,
 				7B542C6EB6278E0047D6439E /* SnapOverlayWindow.swift in Sources */,
