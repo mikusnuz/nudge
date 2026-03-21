@@ -19,6 +19,7 @@
 		95D933E09487CFF3879AB788 /* SnapZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ABE84E0BA0C6951989EE5D /* SnapZone.swift */; };
 		968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */; };
 		AF7E495CC449C994537F5588 /* DisplayHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */; };
+		B7B8741FBCC74378160250DE /* SnapIconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4F73875F9529901D0E2E0 /* SnapIconGenerator.swift */; };
 		DE3533CA56943B3B261376A0 /* SnapAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDCAA75D7385ECAD476425C /* SnapAction.swift */; };
 		E7D19AECD271724EBF00359E /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94958E79F696A47AFE35453 /* HotkeyManager.swift */; };
 		EFA09A06F2C0A8B9EAADBD25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD61E0B5184F594FAACB7628 /* AppDelegate.swift */; };
@@ -43,6 +44,7 @@
 		2BE29C012FD7CBDF9229AEE6 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		31FEE976A494EF28079ED9FF /* SnapActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapActionTests.swift; sourceTree = "<group>"; };
 		3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayHelper.swift; sourceTree = "<group>"; };
+		3ED4F73875F9529901D0E2E0 /* SnapIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapIconGenerator.swift; sourceTree = "<group>"; };
 		50361DA1FBA39934BD3333ED /* Nudge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nudge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B6D5547BAC8324EC7CE56B8 /* DragSnapZoneDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragSnapZoneDetectionTests.swift; sourceTree = "<group>"; };
 		7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapOverlayWindow.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 			children = (
 				9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */,
 				DDD4EA8C359F6394C3B78DBD /* PreferencesWindow.swift */,
+				3ED4F73875F9529901D0E2E0 /* SnapIconGenerator.swift */,
 				7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */,
 				B4BC0DF7C25F6B121DB9C7F2 /* StatusBarController.swift */,
 			);
@@ -232,6 +235,7 @@
 				968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */,
 				F6368D66B74679CC63ADEE3C /* PreferencesWindow.swift in Sources */,
 				DE3533CA56943B3B261376A0 /* SnapAction.swift in Sources */,
+				B7B8741FBCC74378160250DE /* SnapIconGenerator.swift in Sources */,
 				7B542C6EB6278E0047D6439E /* SnapOverlayWindow.swift in Sources */,
 				95D933E09487CFF3879AB788 /* SnapZone.swift in Sources */,
 				65A59ED455AA9AEB9683A2F1 /* StatusBarController.swift in Sources */,

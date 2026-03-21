@@ -78,40 +78,48 @@ final class DragSnapManager {
         }
 
         dragEventCount += 1
-        if dragEventCount < 3 { return }
 
-        if dragEventCount == 3 {
+        guard let startCursorPos = dragStartCursorPosition else {
+            resetDragState()
+            return
+        }
+
+        let cursorDelta = hypot(cursorPosition.x - startCursorPos.x, cursorPosition.y - startCursorPos.y)
+
+        // Wait until cursor moves at least 5px before doing anything
+        if cursorDelta < 5 { return }
+
+        // On first significant movement, verify it's a window drag
+        if dragEventCount <= 5 {
             guard let window = draggedWindow,
                   let currentWindowPos = WindowManager.shared.getPosition(of: window),
-                  let startWindowPos = dragStartWindowPosition,
-                  let startCursorPos = dragStartCursorPosition else {
+                  let startWindowPos = dragStartWindowPosition else {
                 resetDragState()
                 return
             }
-
             let windowDelta = hypot(currentWindowPos.x - startWindowPos.x, currentWindowPos.y - startWindowPos.y)
-            let cursorDelta = hypot(cursorPosition.x - startCursorPos.x, cursorPosition.y - startCursorPos.y)
-
+            // If cursor moved 30px+ but window didn't move, it's not a window drag
             if cursorDelta > 30 && windowDelta < 5 {
                 resetDragState()
                 return
             }
+        }
 
-            // Only restore from snap if dragging from the title bar
-            if !didRestoreFromSnap && isTitleBarDrag {
-                didRestoreFromSnap = true
-                let cursor = cursorPosition
-                if WindowManager.shared.hasPreviousFrame(for: window) {
-                    DispatchQueue.main.async {
-                        WindowManager.shared.restoreWindowAtCursor(window, cursorCG: cursor)
-                    }
-                    return
-                } else if WindowManager.shared.isWindowMaximized(window) {
-                    DispatchQueue.main.async {
-                        WindowManager.shared.restoreFromMaximized(window, cursorCG: cursor)
-                    }
-                    return
+        // Restore from snap — only after cursor moves 20px+ and only from title bar
+        if !didRestoreFromSnap && isTitleBarDrag && cursorDelta > 20 {
+            didRestoreFromSnap = true
+            guard let window = draggedWindow else { return }
+            let cursor = cursorPosition
+            if WindowManager.shared.hasPreviousFrame(for: window) {
+                DispatchQueue.main.async {
+                    WindowManager.shared.restoreWindowAtCursor(window, cursorCG: cursor)
                 }
+                return
+            } else if WindowManager.shared.isWindowMaximized(window) {
+                DispatchQueue.main.async {
+                    WindowManager.shared.restoreFromMaximized(window, cursorCG: cursor)
+                }
+                return
             }
         }
 

@@ -25,40 +25,40 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     private func buildMenu(_ menu: NSMenu) {
         // --- Halves ---
-        addSnapItem(menu, .leftHalf, icon: "◧")
-        addSnapItem(menu, .rightHalf, icon: "◨")
-        addSnapItem(menu, .topHalf, icon: "⬒")
-        addSnapItem(menu, .bottomHalf, icon: "⬓")
+        addSnapItem(menu, .leftHalf)
+        addSnapItem(menu, .rightHalf)
+        addSnapItem(menu, .topHalf)
+        addSnapItem(menu, .bottomHalf)
         menu.addItem(.separator())
 
         // --- Quarters ---
-        addSnapItem(menu, .topLeft, icon: "◰")
-        addSnapItem(menu, .topRight, icon: "◳")
-        addSnapItem(menu, .bottomLeft, icon: "◱")
-        addSnapItem(menu, .bottomRight, icon: "◲")
+        addSnapItem(menu, .topLeft)
+        addSnapItem(menu, .topRight)
+        addSnapItem(menu, .bottomLeft)
+        addSnapItem(menu, .bottomRight)
         menu.addItem(.separator())
 
         // --- Thirds ---
-        addSnapItem(menu, .leftThird, icon: "⊏")
-        addSnapItem(menu, .centerThird, icon: "⊓")
-        addSnapItem(menu, .rightThird, icon: "⊐")
+        addSnapItem(menu, .leftThird)
+        addSnapItem(menu, .centerThird)
+        addSnapItem(menu, .rightThird)
         menu.addItem(.separator())
 
         // --- Two Thirds ---
-        addSnapItem(menu, .leftTwoThirds, icon: "◧")
-        addSnapItem(menu, .centerTwoThirds, icon: "⊓")
-        addSnapItem(menu, .rightTwoThirds, icon: "◨")
+        addSnapItem(menu, .leftTwoThirds)
+        addSnapItem(menu, .centerTwoThirds)
+        addSnapItem(menu, .rightTwoThirds)
         menu.addItem(.separator())
 
         // --- Display ---
-        addSnapItem(menu, .nextDisplay, icon: "▶")
-        addSnapItem(menu, .previousDisplay, icon: "◀")
+        addSnapItem(menu, .nextDisplay)
+        addSnapItem(menu, .previousDisplay)
         menu.addItem(.separator())
 
         // --- Maximize / Center / Restore ---
-        addSnapItem(menu, .maximize, icon: "⬜")
-        addSnapItem(menu, .center, icon: "⊞")
-        addSnapItem(menu, .restore, icon: "↩")
+        addSnapItem(menu, .maximize)
+        addSnapItem(menu, .center)
+        addSnapItem(menu, .restore)
         menu.addItem(.separator())
 
         // --- Settings ---
@@ -96,22 +96,19 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         menu.addItem(quitItem)
     }
 
-    private func addSnapItem(_ menu: NSMenu, _ action: SnapAction, icon: String) {
+    private func addSnapItem(_ menu: NSMenu, _ action: SnapAction) {
         let hotkey = UserPreferences.shared.hotkey(for: action)
 
-        // Build the menu item with shortcut shown inline
         let item = NSMenuItem()
         item.target = self
         item.action = #selector(menuActionClicked(_:))
         item.representedObject = action
+        item.title = action.displayName
+        item.image = SnapIconGenerator.icon(for: action)
 
-        // Set key equivalent for native shortcut display
         let (keyEquiv, modMask) = nativeKeyEquivalent(modifiers: hotkey.modifiers, keyCode: hotkey.keyCode)
         item.keyEquivalent = keyEquiv
         item.keyEquivalentModifierMask = modMask
-
-        // Title with icon
-        item.title = "\(icon)  \(action.displayName)"
 
         menu.addItem(item)
     }
