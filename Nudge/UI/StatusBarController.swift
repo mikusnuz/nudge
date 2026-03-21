@@ -125,10 +125,10 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
         // Create attributed string with monospaced shortcut
         let attrStr = NSMutableAttributedString(string: title, attributes: [
-            .font: NSFont.menuFont(ofSize: 14)
+            .font: NSFont.systemFont(ofSize: 14)
         ])
         let shortcut = NSAttributedString(string: "  \(shortcutText)", attributes: [
-            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
+            .font: NSFont.systemFont(ofSize: 12, weight: .regular),
             .foregroundColor: NSColor.secondaryLabelColor
         ])
         attrStr.append(shortcut)
@@ -193,8 +193,8 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         case kVK_RightArrow: return "→"
         case kVK_UpArrow: return "↑"
         case kVK_DownArrow: return "↓"
-        case kVK_Return: return "↩"
-        case kVK_Delete: return "⌫"
+        case kVK_Return: return "Return"
+        case kVK_Delete: return "Delete"
         case kVK_ANSI_U: return "U"
         case kVK_ANSI_I: return "I"
         case kVK_ANSI_J: return "J"
