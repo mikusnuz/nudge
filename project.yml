@@ -35,6 +35,7 @@ targets:
         CFBundleShortVersionString: "1.0.0"
         NSAccessibilityUsageDescription: "Nudge needs accessibility access to move and resize windows."
         LSMinimumSystemVersion: "11.0"
+        NSPrincipalClass: NSApplication
   NudgeTests:
     type: bundle.unit-test
     platform: macOS

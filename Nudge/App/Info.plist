@@ -26,5 +26,7 @@
 	<true/>
 	<key>NSAccessibilityUsageDescription</key>
 	<string>Nudge needs accessibility access to move and resize windows.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 </dict>
 </plist>

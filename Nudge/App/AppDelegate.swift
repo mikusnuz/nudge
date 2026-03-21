@@ -2,19 +2,30 @@ import Cocoa
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController!
+    private var didSetup = false
 
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func setup() {
+        guard !didSetup else { return }
+        didSetup = true
+
         _ = DisplayHelper.shared
         statusBarController = StatusBarController()
         statusBarController.setup()
 
-        // Request accessibility — system shows its own prompt
-        AccessibilityHelper.shared.requestAccessAndPoll { [weak self] granted in
-            guard granted else { return }
-            DispatchQueue.main.async {
-                self?.startEngines()
+        if AccessibilityHelper.shared.isAccessibilityGranted {
+            startEngines()
+        } else {
+            AccessibilityHelper.shared.requestAccessAndPoll { [weak self] granted in
+                guard granted else { return }
+                DispatchQueue.main.async {
+                    self?.startEngines()
+                }
             }
         }
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        setup()
     }
 
     private func startEngines() {
