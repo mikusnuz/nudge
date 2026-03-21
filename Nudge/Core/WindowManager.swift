@@ -250,19 +250,16 @@ final class WindowManager {
 
     private func center(window: AXUIElement, on screen: NSScreen) {
         guard let size = getSize(of: window) else { return }
-        let f = screen.visibleFrame
-        let nsOrigin = CGPoint(
-            x: f.minX + (f.width - size.width) / 2,
-            y: f.minY + (f.height - size.height) / 2
-        )
-        guard let mainScreen = NSScreen.screens.first else { return }
-        let cgY = mainScreen.frame.height - nsOrigin.y - size.height
-        let cgOrigin = CGPoint(x: nsOrigin.x, y: cgY)
-        if let currentFrame = getFrame(of: window),
-           let windowID = getWindowID(of: window) {
+        guard let currentFrame = getFrame(of: window) else { return }
+
+        let screenCG = convertToCG(nsFrame: screen.visibleFrame, screen: screen)
+        let cgX = screenCG.minX + (screenCG.width - size.width) / 2
+        let cgY = screenCG.minY + (screenCG.height - size.height) / 2
+
+        if let windowID = getWindowID(of: window) {
             previousFrames[windowID] = currentFrame
         }
-        setPosition(of: window, to: cgOrigin)
+        setPosition(of: window, to: CGPoint(x: cgX, y: cgY))
     }
 
     private func moveToDisplay(window: AXUIElement, from currentScreen: NSScreen, next: Bool) {
