@@ -106,7 +106,7 @@ final class DragSnapManager {
         }
 
         // Restore from snap — only after cursor moves 20px+ and only from title bar
-        if !didRestoreFromSnap && isTitleBarDrag && cursorDelta > 20 {
+        if !didRestoreFromSnap && isTitleBarDrag && cursorDelta > 50 {
             didRestoreFromSnap = true
             guard let window = draggedWindow else { return }
             let cursor = cursorPosition

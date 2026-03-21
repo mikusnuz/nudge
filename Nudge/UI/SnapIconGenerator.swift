@@ -78,9 +78,23 @@ struct SnapIconGenerator {
         case .maximize:
             return NSRect(x: x + p, y: y + p, width: w - p * 2, height: h - p * 2)
 
-        // Others — no fill, use SF Symbols or skip
-        case .center, .restore, .nextDisplay, .previousDisplay:
-            return nil
+        // Center — small rect in the middle
+        case .center:
+            let cw = w * 0.5
+            let ch = h * 0.5
+            return NSRect(x: x + (w - cw) / 2, y: y + (h - ch) / 2, width: cw, height: ch)
+
+        // Restore — smaller rect offset to show "unstacking"
+        case .restore:
+            return NSRect(x: x + w * 0.15, y: y + h * 0.15, width: w * 0.55, height: h * 0.55)
+
+        // Next Display — right arrow shape (right half filled)
+        case .nextDisplay:
+            return NSRect(x: x + w * 0.5, y: y + p, width: w * 0.5 - p, height: h - p * 2)
+
+        // Previous Display — left arrow shape (left half filled)
+        case .previousDisplay:
+            return NSRect(x: x + p, y: y + p, width: w * 0.5 - p, height: h - p * 2)
         }
     }
 }
