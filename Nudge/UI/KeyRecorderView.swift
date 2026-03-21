@@ -141,7 +141,7 @@ final class KeyRecorderView: NSView {
         case kVK_UpArrow: return "↑"
         case kVK_DownArrow: return "↓"
         case kVK_Return: return "Return"
-        case kVK_Delete: return "Delete"
+        case kVK_Delete: return "Backspace"
         case kVK_Space: return "Space"
         case kVK_Tab: return "Tab"
         case kVK_Escape: return "Esc"

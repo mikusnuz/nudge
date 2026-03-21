@@ -194,7 +194,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         case kVK_UpArrow: return "↑"
         case kVK_DownArrow: return "↓"
         case kVK_Return: return "Return"
-        case kVK_Delete: return "Delete"
+        case kVK_Delete: return "Backspace"
         case kVK_ANSI_U: return "U"
         case kVK_ANSI_I: return "I"
         case kVK_ANSI_J: return "J"
