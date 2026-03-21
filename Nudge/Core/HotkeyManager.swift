@@ -6,10 +6,8 @@ final class HotkeyManager {
     private var hotkeyRefs: [EventHotKeyRef] = []
     private var actionMap: [UInt32: SnapAction] = [:]
     private var nextID: UInt32 = 1
-    private var lastActionTime: Date = .distantPast
-    private var lastAction: SnapAction?
-    private let debounceInterval: TimeInterval = 0.3
     private var isRunning = false
+    private var isPerforming = false
 
     func start() {
         guard !isRunning else { return }
@@ -25,17 +23,14 @@ final class HotkeyManager {
     }
 
     func reloadHotkeys() {
-        let wasRunning = isRunning
-        if wasRunning { unregisterAllHotkeys() }
-        if wasRunning { registerAllHotkeys() }
+        unregisterAllHotkeys()
+        registerAllHotkeys()
     }
 
-    /// Temporarily disable all hotkeys (for shortcut recording)
     func pause() {
         unregisterAllHotkeys()
     }
 
-    /// Re-enable all hotkeys
     func resume() {
         registerAllHotkeys()
     }
@@ -54,17 +49,20 @@ final class HotkeyManager {
     }
 
     private func handleHotkey(id: UInt32) {
+        // Prevent re-entry — if an action is in progress, ignore
+        guard !isPerforming else { return }
         guard let action = actionMap[id] else { return }
 
-        // Debounce — prevent key repeat from firing multiple times
-        let now = Date()
-        if now.timeIntervalSince(lastActionTime) < debounceInterval && lastAction == action {
-            return
-        }
-        lastActionTime = now
-        lastAction = action
+        isPerforming = true
 
-        WindowManager.shared.performAction(action)
+        DispatchQueue.main.async {
+            WindowManager.shared.performAction(action)
+
+            // Block further actions for 200ms to prevent double-fire
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.isPerforming = false
+            }
+        }
     }
 
     // MARK: - Registration
