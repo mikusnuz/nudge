@@ -260,6 +260,21 @@
     height: 16px;
   }
 
+  /* Brew command */
+  .brew-cmd {
+    max-width:480px;margin:16px auto 0;padding:0 16px;box-sizing:border-box;
+  }
+  .brew-cmd pre {
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text-dim);
+    text-align:center;white-space:nowrap;overflow:hidden;
+  }
+  @media (max-width: 480px) {
+    .brew-cmd pre {
+      white-space:pre-wrap;word-break:break-all;text-align:left;font-size:12px;
+    }
+  }
+
   /* Window animation */
   .demo-window {
     transition: x 0.2s cubic-bezier(0.16,1,0.3,1),
@@ -321,9 +336,8 @@
     <a href="https://github.com/mikusnuz/nudge/releases/latest" class="btn btn-primary">Download for Mac</a>
     <a href="https://ko-fi.com/mikusnuz" class="btn btn-ghost">Support Nudge</a>
   </div>
-  <div style="max-width:320px;margin:16px auto 0;padding:0 16px;box-sizing:border-box;">
-    <pre style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--text-dim);text-align:left;"><code>brew tap mikusnuz/tap
-brew install nudge-run</code></pre>
+  <div class="brew-cmd">
+    <pre><code>brew tap mikusnuz/tap && brew install nudge-run</code></pre>
   </div>
 
   <!-- Animated Demo -->
