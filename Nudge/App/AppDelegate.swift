@@ -9,6 +9,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard !didSetup else { return }
         didSetup = true
 
+        Analytics.track("app_launched")
+
         _ = DisplayHelper.shared
         statusBarController = StatusBarController()
         statusBarController.setup()

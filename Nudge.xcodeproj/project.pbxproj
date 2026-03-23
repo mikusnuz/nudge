@@ -19,6 +19,7 @@
 		909BCD93AFD46C773D5E71DB /* SnapZoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16D4E4EF90EFC59610EE29C /* SnapZoneTests.swift */; };
 		95D933E09487CFF3879AB788 /* SnapZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ABE84E0BA0C6951989EE5D /* SnapZone.swift */; };
 		968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */; };
+		A7D6B80D3E09D0264DE6927D /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 811D56577D6C19F75C04089C /* Analytics.swift */; };
 		AF7E495CC449C994537F5588 /* DisplayHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */; };
 		B7B8741FBCC74378160250DE /* SnapIconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4F73875F9529901D0E2E0 /* SnapIconGenerator.swift */; };
 		DE3533CA56943B3B261376A0 /* SnapAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDCAA75D7385ECAD476425C /* SnapAction.swift */; };
@@ -50,6 +51,7 @@
 		7405730654BA450CB29B76DC /* Nudge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nudge.entitlements; sourceTree = "<group>"; };
 		7B6D5547BAC8324EC7CE56B8 /* DragSnapZoneDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragSnapZoneDetectionTests.swift; sourceTree = "<group>"; };
 		7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapOverlayWindow.swift; sourceTree = "<group>"; };
+		811D56577D6C19F75C04089C /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyRecorderView.swift; sourceTree = "<group>"; };
 		9FF5452511B5430A6199287E /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		B4BC0DF7C25F6B121DB9C7F2 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				B8737084F2E2A1667E9F1489 /* AccessibilityHelper.swift */,
+				811D56577D6C19F75C04089C /* Analytics.swift */,
 				3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */,
 			);
 			path = Helpers;
@@ -254,6 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7A376DE43562EEBAD07755BC /* AccessibilityHelper.swift in Sources */,
+				A7D6B80D3E09D0264DE6927D /* Analytics.swift in Sources */,
 				EFA09A06F2C0A8B9EAADBD25 /* AppDelegate.swift in Sources */,
 				AF7E495CC449C994537F5588 /* DisplayHelper.swift in Sources */,
 				71EC31D05E3F050EDC6214D5 /* DragSnapManager.swift in Sources */,
