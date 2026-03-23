@@ -179,7 +179,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     }
 
     @objc private func openSponsor() {
-        NSWorkspace.shared.open(URL(string: "https://github.com/sponsors/mikusnuz")!)
+        NSWorkspace.shared.open(URL(string: "https://ko-fi.com/mikusnuz")!)
     }
 
     @objc private func showAbout() {
