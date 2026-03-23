@@ -9,10 +9,13 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "11.0"
-    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_IDENTITY: "Developer ID Application"
+    DEVELOPMENT_TEAM: HYLW8XAUNV
+    CODE_SIGN_STYLE: Manual
     PRODUCT_BUNDLE_IDENTIFIER: app.nudge.Nudge
     INFOPLIST_FILE: Nudge/App/Info.plist
     ENABLE_APP_SANDBOX: false
+    ENABLE_HARDENED_RUNTIME: true
 targets:
   Nudge:
     type: application
@@ -21,10 +24,13 @@ targets:
       - path: Nudge
     attributes:
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    entitlements:
+      path: Nudge/App/Nudge.entitlements
     settings:
       base:
         INFOPLIST_FILE: Nudge/App/Info.plist
         ENABLE_APP_SANDBOX: false
+        CODE_SIGN_ENTITLEMENTS: Nudge/App/Nudge.entitlements
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
     info:
       path: Nudge/App/Info.plist
