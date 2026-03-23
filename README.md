@@ -53,36 +53,32 @@ All shortcuts can be remapped in **Nudge → Settings → Shortcuts**.
 
 ## Installation
 
+### Download
+
+Download the latest DMG from [GitHub Releases](https://github.com/mikusnuz/nudge/releases/latest). Open, drag to Applications, done.
+
+Signed & notarized by Apple — no Gatekeeper warnings.
+
+### Homebrew
+
+```bash
+brew tap mikusnuz/tap
+brew install nudge-run
+```
+
 ### Build from Source
 
-1. Clone the repository:
+```bash
+git clone https://github.com/mikusnuz/nudge.git
+cd nudge
+brew install xcodegen
+xcodegen generate
+open Nudge.xcodeproj
+```
 
-   ```bash
-   git clone https://github.com/mikusnuz/nudge.git
-   cd nudge
-   ```
+Press **⌘R** to build and run.
 
-2. Install xcodegen (if not already installed):
-
-   ```bash
-   brew install xcodegen
-   ```
-
-3. Generate the Xcode project:
-
-   ```bash
-   xcodegen generate
-   ```
-
-4. Open in Xcode and build:
-
-   ```bash
-   open Nudge.xcodeproj
-   ```
-
-   Press **⌘R** to build and run, or use **Product → Archive** to build a release binary.
-
-5. On first launch, grant Nudge **Accessibility** permissions when prompted in System Settings → Privacy & Security → Accessibility.
+On first launch, grant Nudge **Accessibility** permissions when prompted in System Settings → Privacy & Security → Accessibility.
 
 ---
 
