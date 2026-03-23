@@ -319,7 +319,7 @@
   <p class="sub">Snap windows into the right position with keyboard shortcuts or drag-to-edge. Free, open source, and lightweight.</p>
   <div class="buttons buttons-center">
     <a href="https://github.com/mikusnuz/nudge/releases/latest" class="btn btn-primary">Download for Mac</a>
-    <a href="https://ko-fi.com/mikusnuz" class="btn btn-ghost">Support Nudge</a>
+    <a href="#install" class="btn btn-ghost">Install via Homebrew</a>
   </div>
 
   <!-- Animated Demo -->
@@ -658,13 +658,27 @@
 <section id="install">
   <div class="section-tag">Install</div>
   <h2>Get Nudge</h2>
-  <p class="desc">Download the DMG or install with Homebrew.</p>
-  <div class="buttons buttons-center" style="margin-bottom:24px;">
-    <a href="https://github.com/mikusnuz/nudge/releases/latest" class="btn btn-primary">Download for Mac</a>
+  <p class="desc">Choose your preferred installation method.</p>
+
+  <div style="display:flex;gap:24px;max-width:640px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
+    <div style="flex:1;min-width:280px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:left;">
+      <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px;">Option 1</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:12px;">Direct Download</div>
+      <p style="color:var(--text-dim);font-size:14px;margin-bottom:16px;">Download the DMG, open it, and drag Nudge to Applications.</p>
+      <a href="https://github.com/mikusnuz/nudge/releases/latest" class="btn btn-primary" style="width:100%;text-align:center;">Download for Mac</a>
+    </div>
+    <div style="flex:1;min-width:280px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:left;">
+      <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px;">Option 2</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:12px;">Homebrew</div>
+      <p style="color:var(--text-dim);font-size:14px;margin-bottom:16px;">Install and update with a single command.</p>
+      <pre style="background:rgba(0,0,0,0.3);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text);margin:0;overflow-x:auto;"><code>brew tap mikusnuz/tap
+brew install nudge-run</code></pre>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:24px;">
     <a href="https://ko-fi.com/mikusnuz" class="btn btn-ghost">Support Nudge</a>
   </div>
-  <pre style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px 24px;max-width:480px;margin:0 auto;font-size:14px;color:var(--text-dim);text-align:left;"><code>brew tap mikusnuz/tap
-brew install nudge-run</code></pre>
 </section>
 
 <footer>
