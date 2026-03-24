@@ -39,23 +39,27 @@ final class DisplayHelper {
         return bestScreen
     }
 
-    /// Next screen to the right. Returns nil if already at the last screen (no wrap).
+    private var sortedScreens: [NSScreen] {
+        NSScreen.screens.sorted { $0.frame.origin.x < $1.frame.origin.x }
+    }
+
+    /// Next screen to the right (by physical position). No wrap.
     func nextScreen(from current: NSScreen) -> NSScreen? {
-        let screens = NSScreen.screens
+        let screens = sortedScreens
         guard screens.count > 1 else { return nil }
         guard let idx = screens.firstIndex(of: current) else { return nil }
         let nextIdx = idx + 1
-        guard nextIdx < screens.count else { return nil } // No wrap-around
+        guard nextIdx < screens.count else { return nil }
         return screens[nextIdx]
     }
 
-    /// Previous screen to the left. Returns nil if already at the first screen (no wrap).
+    /// Previous screen to the left (by physical position). No wrap.
     func previousScreen(from current: NSScreen) -> NSScreen? {
-        let screens = NSScreen.screens
+        let screens = sortedScreens
         guard screens.count > 1 else { return nil }
         guard let idx = screens.firstIndex(of: current) else { return nil }
         let prevIdx = idx - 1
-        guard prevIdx >= 0 else { return nil } // No wrap-around
+        guard prevIdx >= 0 else { return nil }
         return screens[prevIdx]
     }
 }
