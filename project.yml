@@ -40,7 +40,7 @@ targets:
         CFBundleDisplayName: Nudge
         CFBundleIdentifier: app.nudge.Nudge
         CFBundleVersion: "1"
-        CFBundleShortVersionString: "1.0.0"
+        CFBundleShortVersionString: "1.0.1"
         NSAccessibilityUsageDescription: "Nudge needs accessibility access to move and resize windows."
         LSMinimumSystemVersion: "11.0"
         NSPrincipalClass: NSApplication
