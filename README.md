@@ -4,6 +4,10 @@ A free, open-source macOS window manager.
 
 Nudge lets you snap, resize, and organize your windows with keyboard shortcuts and drag-to-edge gestures — no subscription required.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Nudge demo" width="640">
+</p>
+
 ---
 
 ## Features
