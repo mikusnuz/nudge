@@ -31,6 +31,8 @@ xcodebuild -project "$PROJECT_DIR/Nudge.xcodeproj" \
   ENABLE_HARDENED_RUNTIME=YES \
   OTHER_CODE_SIGN_FLAGS="--options runtime --timestamp" \
   CODE_SIGN_ENTITLEMENTS="$PROJECT_DIR/Nudge/App/Nudge.entitlements" \
+  ARCHS="arm64 x86_64" \
+  ONLY_ACTIVE_ARCH=NO \
   -quiet
 
 # Copy app
