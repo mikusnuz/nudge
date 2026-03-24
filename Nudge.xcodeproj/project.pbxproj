@@ -16,6 +16,7 @@
 		71EC31D05E3F050EDC6214D5 /* DragSnapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88D8B5EAD1EEF756D628ADF /* DragSnapManager.swift */; };
 		7A376DE43562EEBAD07755BC /* AccessibilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8737084F2E2A1667E9F1489 /* AccessibilityHelper.swift */; };
 		7B542C6EB6278E0047D6439E /* SnapOverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */; };
+		8F33E5DB8197918F878FF425 /* FileLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61655849A25B82399ADF40FB /* FileLog.swift */; };
 		909BCD93AFD46C773D5E71DB /* SnapZoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16D4E4EF90EFC59610EE29C /* SnapZoneTests.swift */; };
 		95D933E09487CFF3879AB788 /* SnapZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8ABE84E0BA0C6951989EE5D /* SnapZone.swift */; };
 		968B729F6A1F6B499476E4D8 /* KeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2EE831E6AC17D70395D458 /* KeyRecorderView.swift */; };
@@ -48,6 +49,7 @@
 		3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayHelper.swift; sourceTree = "<group>"; };
 		3ED4F73875F9529901D0E2E0 /* SnapIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapIconGenerator.swift; sourceTree = "<group>"; };
 		50361DA1FBA39934BD3333ED /* Nudge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nudge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		61655849A25B82399ADF40FB /* FileLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLog.swift; sourceTree = "<group>"; };
 		7405730654BA450CB29B76DC /* Nudge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nudge.entitlements; sourceTree = "<group>"; };
 		7B6D5547BAC8324EC7CE56B8 /* DragSnapZoneDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragSnapZoneDetectionTests.swift; sourceTree = "<group>"; };
 		7C37AB5A2D0E748A35AC93CE /* SnapOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapOverlayWindow.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 				B8737084F2E2A1667E9F1489 /* AccessibilityHelper.swift */,
 				811D56577D6C19F75C04089C /* Analytics.swift */,
 				3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */,
+				61655849A25B82399ADF40FB /* FileLog.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -176,8 +179,6 @@
 				2F965375C473C14EE52D75A2 /* PBXTargetDependency */,
 			);
 			name = NudgeTests;
-			packageProductDependencies = (
-			);
 			productName = NudgeTests;
 			productReference = E76839C99030AD6A563C1705 /* NudgeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -194,8 +195,6 @@
 			dependencies = (
 			);
 			name = Nudge;
-			packageProductDependencies = (
-			);
 			productName = Nudge;
 			productReference = 50361DA1FBA39934BD3333ED /* Nudge.app */;
 			productType = "com.apple.product-type.application";
@@ -272,6 +271,7 @@
 				54843A40C0A5530ADB2BF2BD /* UserPreferences.swift in Sources */,
 				0E31B07398367CC729EAB9D7 /* WindowManager.swift in Sources */,
 				FF59BC71041F091E9F5D6DE3 /* main.swift in Sources */,
+				8F33E5DB8197918F878FF425 /* FileLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,7 +382,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
 				INFOPLIST_FILE = Nudge/App/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -410,7 +413,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
 				INFOPLIST_FILE = Nudge/App/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				SDKROOT = macosx;
 			};
 			name = Release;

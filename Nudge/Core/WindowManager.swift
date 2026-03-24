@@ -1,24 +1,140 @@
 import Cocoa
 import ApplicationServices
+import os.log
+
+private let log = OSLog(subsystem: "run.nudge.app", category: "WindowManager")
 
 final class WindowManager {
     static let shared = WindowManager()
 
     private var previousFrames: [String: CGRect] = [:]
+    private var lastSnapAction: (windowID: String, action: SnapAction, screen: NSScreen)?
 
     // MARK: - Get Focused Window
 
     func getFocusedWindow() -> AXUIElement? {
+        // Step 1: Get the frontmost app's PID (two strategies)
+        let pid: pid_t
+        let appElement: AXUIElement
+
         let systemWide = AXUIElementCreateSystemWide()
         var focusedApp: AnyObject?
-        guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedApplicationAttribute as CFString, &focusedApp) == .success else {
+        let appResult = AXUIElementCopyAttributeValue(systemWide, kAXFocusedApplicationAttribute as CFString, &focusedApp)
+
+        if appResult == .success, let app = focusedApp {
+            let axApp = app as! AXUIElement
+            var p: pid_t = 0
+            AXUIElementGetPid(axApp, &p)
+            pid = p
+            appElement = axApp
+        } else if let frontApp = NSWorkspace.shared.frontmostApplication {
+            pid = frontApp.processIdentifier
+            appElement = AXUIElementCreateApplication(pid)
+        } else {
+            FileLog.write("getFocusedWindow: no app found")
             return nil
         }
-        var focusedWindow: AnyObject?
-        guard AXUIElementCopyAttributeValue(focusedApp as! AXUIElement, kAXFocusedWindowAttribute as CFString, &focusedWindow) == .success else {
-            return nil
+
+        let appName = NSRunningApplication(processIdentifier: pid)?.localizedName ?? "pid:\(pid)"
+
+        // Step 2: Try AX attributes to get the focused/main window
+        if let window = axWindow(from: appElement, appName: appName) {
+            return window
         }
-        return (focusedWindow as! AXUIElement)
+
+        // Step 3: If appElement came from systemWide, also try PID-based element
+        if appResult == .success {
+            let pidApp = AXUIElementCreateApplication(pid)
+            if let window = axWindow(from: pidApp, appName: appName) {
+                FileLog.write("getFocusedWindow: OK via PID-rebased [\(appName)]")
+                return window
+            }
+        }
+
+        // Step 4: Use CGWindowList to find the topmost on-screen window for this PID,
+        //         then match it to an AX window by position
+        if let window = windowViaCGWindowList(pid: pid, appElement: appElement, appName: appName) {
+            return window
+        }
+
+        FileLog.write("getFocusedWindow: ALL methods failed [\(appName)]")
+        return nil
+    }
+
+    /// Try focusedWindow → mainWindow → windows[] on an AX app element
+    private func axWindow(from appElement: AXUIElement, appName: String) -> AXUIElement? {
+        // focusedWindow
+        var fw: AnyObject?
+        if AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &fw) == .success,
+           let w = fw as! AXUIElement?, getPosition(of: w) != nil {
+            return w
+        }
+        // mainWindow
+        var mw: AnyObject?
+        if AXUIElementCopyAttributeValue(appElement, kAXMainWindowAttribute as CFString, &mw) == .success,
+           let w = mw as! AXUIElement?, getPosition(of: w) != nil {
+            return w
+        }
+        // walk windows array
+        var wl: AnyObject?
+        if AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &wl) == .success,
+           let windows = wl as? [AXUIElement] {
+            for w in windows {
+                if getPosition(of: w) != nil, getSize(of: w) != nil {
+                    return w
+                }
+            }
+        }
+        return nil
+    }
+
+    /// Use CGWindowListCopyWindowInfo to find the topmost window for a PID,
+    /// then match its bounds against AX windows to return the correct AXUIElement
+    private func windowViaCGWindowList(pid: pid_t, appElement: AXUIElement, appName: String) -> AXUIElement? {
+        let allWindows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+
+        // Find the topmost (first in z-order) normal window for this PID
+        var targetBounds: CGRect?
+        for info in allWindows {
+            guard let wPid = info[kCGWindowOwnerPID as String] as? pid_t, wPid == pid,
+                  let layer = info[kCGWindowLayer as String] as? Int, layer == 0,
+                  let bounds = info[kCGWindowBounds as String] as? [String: CGFloat] else { continue }
+            let x = bounds["X"] ?? 0, y = bounds["Y"] ?? 0
+            let w = bounds["Width"] ?? 0, h = bounds["Height"] ?? 0
+            if w > 50 && h > 50 { // skip tiny windows (tooltips, etc.)
+                targetBounds = CGRect(x: x, y: y, width: w, height: h)
+                break // first match = topmost in z-order
+            }
+        }
+
+        guard let target = targetBounds else { return nil }
+
+        // Now match against AX windows by position
+        let pidApp = AXUIElementCreateApplication(pid)
+        var wl: AnyObject?
+        guard AXUIElementCopyAttributeValue(pidApp, kAXWindowsAttribute as CFString, &wl) == .success,
+              let windows = wl as? [AXUIElement] else { return nil }
+
+        for w in windows {
+            guard let pos = getPosition(of: w), let size = getSize(of: w) else { continue }
+            if abs(pos.x - target.origin.x) < 10 &&
+               abs(pos.y - target.origin.y) < 10 &&
+               abs(size.width - target.width) < 10 &&
+               abs(size.height - target.height) < 10 {
+                FileLog.write("getFocusedWindow: OK via CGWindowList match [\(appName)]")
+                return w
+            }
+        }
+
+        // If no exact match, return the first window that has both pos and size
+        for w in windows {
+            if getPosition(of: w) != nil, getSize(of: w) != nil {
+                FileLog.write("getFocusedWindow: OK via CGWindowList first-visible [\(appName)]")
+                return w
+            }
+        }
+
+        return nil
     }
 
     // MARK: - Get/Set Window Position & Size
@@ -66,6 +182,16 @@ final class WindowManager {
         }
         setPosition(of: window, to: frame.origin)
         setSize(of: window, to: frame.size)
+        // Force content re-layout: after a brief delay, nudge size by 1px then restore.
+        // This makes apps like KakaoTalk, Electron apps, etc. re-render their internal content.
+        let finalSize = frame.size
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            let nudged = CGSize(width: finalSize.width + 1, height: finalSize.height)
+            self?.setSize(of: window, to: nudged)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+                self?.setSize(of: window, to: finalSize)
+            }
+        }
     }
 
     // MARK: - Restore
@@ -125,47 +251,66 @@ final class WindowManager {
     // MARK: - Snap Actions
 
     func performAction(_ action: SnapAction) {
-        guard let window = getFocusedWindow() else { return }
+        guard let window = getFocusedWindow() else {
+            FileLog.write("performAction(\(action.rawValue)): no focused window")
+            os_log("performAction: no focused window", log: log, type: .error)
+            return
+        }
 
-        // Skip ignored apps
         var pid: pid_t = 0
         AXUIElementGetPid(window, &pid)
+        let appName = NSRunningApplication(processIdentifier: pid)?.localizedName ?? "?"
+        os_log("performAction: %{public}@ on %{public}@", log: log, type: .info, action.rawValue, appName)
         if let app = NSRunningApplication(processIdentifier: pid),
            let bundleID = app.bundleIdentifier,
            UserPreferences.shared.isAppIgnored(bundleID) {
             return
         }
 
-        guard let currentFrame = getFrame(of: window) else { return }
+        guard let currentFrame = getFrame(of: window) else {
+            os_log("performAction: cannot get window frame", log: log, type: .error)
+            return
+        }
 
         let currentScreen = DisplayHelper.shared.currentScreen(for: currentFrame)
 
         switch action {
         case .restore:
             restoreWindow(window)
+            lastSnapAction = nil
             return
         case .center:
             center(window: window, on: currentScreen)
+            lastSnapAction = nil
             return
         case .nextDisplay:
             moveToDisplay(window: window, from: currentScreen, next: true)
+            lastSnapAction = nil
             return
         case .previousDisplay:
             moveToDisplay(window: window, from: currentScreen, next: false)
+            lastSnapAction = nil
             return
         default:
             break
         }
 
         // Check if window is ALREADY at the target snap position on this screen
+        let windowID = getWindowID(of: window)
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgTarget = convertToCG(nsFrame: targetFrame, screen: currentScreen)
-            if isFrameMatch(currentFrame, cgTarget) {
-                // Already there
+            let exactMatch = isFrameMatch(currentFrame, cgTarget)
+            // Also detect repeat: same window + same action + same screen (handles min-size apps)
+            let repeatMatch = windowID != nil &&
+                lastSnapAction?.windowID == windowID &&
+                lastSnapAction?.action == action &&
+                lastSnapAction?.screen == currentScreen
+            if exactMatch || repeatMatch {
                 if !action.hasCycleDirection {
+                    lastSnapAction = nil
                     return
                 }
-                // Try to cycle to next monitor (no wrap-around)
+                lastSnapAction = nil
                 cycleToNextMonitor(window: window, action: action, from: currentScreen)
                 return
             }
@@ -175,6 +320,9 @@ final class WindowManager {
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgFrame = convertToCG(nsFrame: targetFrame, screen: currentScreen)
             move(window: window, to: cgFrame)
+            if let wid = windowID {
+                lastSnapAction = (windowID: wid, action: action, screen: currentScreen)
+            }
         }
     }
 

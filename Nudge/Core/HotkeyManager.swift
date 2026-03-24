@@ -1,5 +1,8 @@
 import Cocoa
 import Carbon
+import os.log
+
+private let log = OSLog(subsystem: "run.nudge.app", category: "HotkeyManager")
 
 final class HotkeyManager {
     static let shared = HotkeyManager()
@@ -13,11 +16,15 @@ final class HotkeyManager {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        let trusted = AXIsProcessTrusted()
+        FileLog.write("HotkeyManager.start() trusted=\(trusted)")
         if !handlerInstalled {
             installEventHandler()
             handlerInstalled = true
+            FileLog.write("HotkeyManager: event handler installed")
         }
         registerAllHotkeys()
+        FileLog.write("HotkeyManager: \(actionMap.count) hotkeys registered, trusted=\(trusted)")
     }
 
     func stop() {
@@ -46,6 +53,7 @@ final class HotkeyManager {
         let handler: EventHandlerUPP = { _, event, _ -> OSStatus in
             var hotKeyID = EventHotKeyID()
             GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, MemoryLayout<EventHotKeyID>.size, nil, &hotKeyID)
+            FileLog.write("carbon-event: id=\(hotKeyID.id)")
             DispatchQueue.main.async {
                 HotkeyManager.shared.handleHotkey(id: hotKeyID.id)
             }
@@ -55,14 +63,14 @@ final class HotkeyManager {
     }
 
     private func handleHotkey(id: UInt32) {
+        let actionName = actionMap[id]?.displayName ?? "nil"
+        os_log("hotkey: id=%d action=%{public}@", log: log, type: .info, id, actionName)
+        FileLog.write("handleHotkey: id=\(id) action=\(actionName)")
         guard let action = actionMap[id] else { return }
 
-        // Deduplicate Carbon double-fire: ignore if same event within 50ms
         let now = DispatchTime.now().uptimeNanoseconds
         let elapsed = now - lastEventTime
-        if elapsed < 50_000_000 { // 50ms in nanoseconds
-            return
-        }
+        if elapsed < 50_000_000 { return }
         lastEventTime = now
 
         WindowManager.shared.performAction(action)
@@ -86,6 +94,8 @@ final class HotkeyManager {
         let status = RegisterEventHotKey(keyCode, modifiers, hotkeyID, GetApplicationEventTarget(), 0, &hotkeyRef)
         if status == noErr, let ref = hotkeyRef {
             hotkeyRefs.append(ref)
+        } else {
+            FileLog.write("FAILED to register hotkey \(action.rawValue) status=\(status)")
         }
     }
 
