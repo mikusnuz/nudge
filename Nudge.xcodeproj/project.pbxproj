@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0E31B07398367CC729EAB9D7 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE29C012FD7CBDF9229AEE6 /* WindowManager.swift */; };
 		31E503DAC866BD062AE7B86B /* DragSnapZoneDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6D5547BAC8324EC7CE56B8 /* DragSnapZoneDetectionTests.swift */; };
+		4FB18FE439AAA08C6CD76B2E /* SkyLightBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BEBD19D2F27C0A5EE4846F /* SkyLightBridge.swift */; };
 		54843A40C0A5530ADB2BF2BD /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF5452511B5430A6199287E /* UserPreferences.swift */; };
 		5510B0B39D0CEB5E997CCBC3 /* SnapActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31FEE976A494EF28079ED9FF /* SnapActionTests.swift */; };
 		65A59ED455AA9AEB9683A2F1 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BC0DF7C25F6B121DB9C7F2 /* StatusBarController.swift */; };
@@ -63,6 +64,7 @@
 		DBB036BAB62057DE45BBEC7F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDD4EA8C359F6394C3B78DBD /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		E16D4E4EF90EFC59610EE29C /* SnapZoneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapZoneTests.swift; sourceTree = "<group>"; };
+		E4BEBD19D2F27C0A5EE4846F /* SkyLightBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkyLightBridge.swift; sourceTree = "<group>"; };
 		E76839C99030AD6A563C1705 /* NudgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NudgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E88D8B5EAD1EEF756D628ADF /* DragSnapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragSnapManager.swift; sourceTree = "<group>"; };
 		FD61E0B5184F594FAACB7628 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				811D56577D6C19F75C04089C /* Analytics.swift */,
 				3DBDE59251F0C7A9B8CD98F7 /* DisplayHelper.swift */,
 				61655849A25B82399ADF40FB /* FileLog.swift */,
+				E4BEBD19D2F27C0A5EE4846F /* SkyLightBridge.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 				0E31B07398367CC729EAB9D7 /* WindowManager.swift in Sources */,
 				FF59BC71041F091E9F5D6DE3 /* main.swift in Sources */,
 				8F33E5DB8197918F878FF425 /* FileLog.swift in Sources */,
+				4FB18FE439AAA08C6CD76B2E /* SkyLightBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
