@@ -1,0 +1,77 @@
+# Nudge
+
+> Nudge is a free, open-source macOS window manager. Snap windows into perfect positions with keyboard shortcuts or drag-to-edge gestures.
+
+Nudge is a lightweight macOS window manager built with pure Swift and AppKit. It provides 18 window layouts including halves, quarters, thirds, and two-thirds splits, with full multi-monitor support. Windows can be snapped using customizable keyboard shortcuts or by dragging to screen edges with a live preview overlay.
+
+## Key Facts
+
+- **Price**: Free and open source (MIT license)
+- **Platform**: macOS 11 (Big Sur) or later
+- **Architecture**: Universal binary (Apple Silicon + Intel)
+- **Size**: Under 1MB
+- **Built with**: Pure Swift, AppKit — no Electron, no frameworks, zero dependencies
+- **Privacy**: No tracking, no analytics, no data collection
+- **Signed**: Apple notarized and Developer ID signed
+
+## Installation
+
+### Homebrew (recommended)
+```
+brew tap mikusnuz/tap
+brew install nudge-run
+```
+
+### Direct Download
+Download the latest DMG from GitHub Releases: https://github.com/mikusnuz/nudge/releases/latest
+
+### Build from Source
+```
+git clone https://github.com/mikusnuz/nudge.git
+cd nudge
+brew install xcodegen
+xcodegen generate
+open Nudge.xcodeproj
+```
+
+## Window Layouts
+
+Nudge supports 18 window layouts:
+- **Halves**: Left, Right, Top, Bottom
+- **Quarters**: Top Left, Top Right, Bottom Left, Bottom Right
+- **Thirds**: Left Third, Center Third, Right Third
+- **Two Thirds**: Left Two Thirds, Center Two Thirds, Right Two Thirds
+- **Other**: Maximize, Center, Restore
+- **Display**: Next Display, Previous Display
+
+## Default Keyboard Shortcuts
+
+All shortcuts use Ctrl + Option as the base modifier:
+- Arrow keys for halves (Left/Right/Up/Down)
+- U/I/J/K for quarters
+- D/F/G for thirds
+- E/R/T for two-thirds
+- Return for maximize, C for center, Backspace for restore
+- Ctrl+Option+Cmd + arrows for display switching
+
+All shortcuts are fully customizable in Settings.
+
+## Comparison
+
+| Feature | Nudge | Magnet | Rectangle |
+|---------|-------|--------|-----------|
+| Price | Free | $9.99 | Free |
+| Open Source | Yes (MIT) | No | Yes |
+| Dependencies | None | None | Several |
+| App Size | <1MB | ~5MB | ~15MB |
+| Drag-to-Edge | Yes | Yes | Yes |
+| Multi-Monitor | Yes | Yes | Yes |
+| Custom Shortcuts | Yes | Yes | Yes |
+
+## Links
+
+- Website: https://nudge.run
+- GitHub: https://github.com/mikusnuz/nudge
+- Download: https://github.com/mikusnuz/nudge/releases/latest
+- Homebrew Tap: https://github.com/mikusnuz/homebrew-tap
+- Support: https://ko-fi.com/mikusnuz

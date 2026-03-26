@@ -3,23 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nudge — Window Manager for Mac</title>
-<meta name="description" content="Snap windows into perfect positions with keyboard shortcuts or drag-to-edge. Free and open source macOS window manager.">
-<meta name="keywords" content="mac window manager, macOS, snap windows, window tiling, free, open source">
-<meta name="author" content="mikusnuz">
+<title>Nudge — Free Open Source Window Manager for Mac | Magnet Alternative</title>
+<meta name="description" content="Nudge is a free, open-source macOS window manager. Snap windows with keyboard shortcuts or drag-to-edge gestures. Halves, quarters, thirds, multi-monitor — lightweight Magnet & Rectangle alternative.">
+<meta name="keywords" content="mac window manager, macOS window tiling, free window manager mac, magnet alternative, rectangle alternative, snap windows mac, window snapping, open source window manager, mac productivity, keyboard window management">
+<meta name="author" content="Plumbug Studio">
+<link rel="canonical" href="https://nudge.run/">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta property="og:title" content="Nudge — Window Manager for Mac">
-<meta property="og:description" content="Snap windows into perfect positions with keyboard shortcuts or drag-to-edge. Free and open source.">
-<meta property="og:image" content="og-image.png">
+<meta property="og:title" content="Nudge — Free Open Source Window Manager for Mac">
+<meta property="og:description" content="Snap windows into perfect positions with keyboard shortcuts or drag-to-edge. 18 layouts, multi-monitor, fully customizable. Free and open source Magnet alternative.">
+<meta property="og:image" content="https://nudge.run/og-image.png">
+<meta property="og:url" content="https://nudge.run/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Nudge">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nudge — Window Manager for Mac">
-<meta name="twitter:description" content="Snap windows into perfect positions. Free and open source macOS window manager.">
-<meta name="twitter:image" content="og-image.png">
+<meta name="twitter:title" content="Nudge — Free Open Source Window Manager for Mac">
+<meta name="twitter:description" content="Snap windows into perfect positions. 18 layouts, multi-monitor support. Free and open source macOS window manager.">
+<meta name="twitter:image" content="https://nudge.run/og-image.png">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0c0c0c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Nudge",
+  "description": "Free, open-source macOS window manager with keyboard shortcuts and drag-to-edge snapping. Supports halves, quarters, thirds, and multi-monitor layouts.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 11.0+",
+  "url": "https://nudge.run",
+  "downloadUrl": "https://github.com/mikusnuz/nudge/releases/latest",
+  "softwareVersion": "1.0.2",
+  "fileSize": "656KB",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "Plumbug Studio",
+    "url": "https://github.com/mikusnuz"
+  },
+  "screenshot": "https://nudge.run/og-image.png",
+  "featureList": [
+    "18 window layouts (halves, quarters, thirds, two-thirds)",
+    "Keyboard shortcuts with full customization",
+    "Drag-to-edge window snapping with preview overlay",
+    "Multi-monitor support with smart mirroring",
+    "Per-app exclusion rules",
+    "Pure Swift and AppKit — no Electron, no frameworks",
+    "Homebrew installation support",
+    "Apple notarized and signed"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Nudge really free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Nudge is 100% free and open source under the MIT license. No subscriptions, no in-app purchases, no ads. You can inspect every line of code on GitHub."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Nudge compare to Magnet or Rectangle?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nudge offers the same core window management features as Magnet and Rectangle — halves, quarters, thirds, multi-monitor support, and customizable keyboard shortcuts. Unlike Magnet ($9.99), Nudge is completely free. Unlike Rectangle, Nudge is built with pure Swift/AppKit with zero dependencies, resulting in a smaller footprint (under 1MB)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Nudge work on Apple Silicon and Intel Macs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Nudge ships as a universal binary supporting both Apple Silicon (M1/M2/M3/M4) and Intel Macs. It requires macOS 11 Big Sur or later."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I install Nudge?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can install Nudge via Homebrew (brew tap mikusnuz/tap && brew install nudge-run), download the DMG from GitHub Releases, or build from source. The app is signed and notarized by Apple."
+      }
+    }
+  ]
+}
+</script>
 <style>
   :root {
     --bg: #0c0c0c;
@@ -673,8 +755,32 @@
 </section>
 
 
+<!-- FAQ -->
+<section id="faq" style="max-width:680px;margin:0 auto;padding:80px 24px 40px;">
+  <div class="section-tag">FAQ</div>
+  <h2 style="text-align:center;margin-bottom:40px;">Frequently Asked Questions</h2>
+  <div style="display:flex;flex-direction:column;gap:24px;">
+    <details style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+      <summary style="cursor:pointer;font-weight:600;font-size:16px;list-style:none;">Is Nudge really free?</summary>
+      <p style="color:var(--text-dim);margin-top:12px;line-height:1.7;">Yes. Nudge is 100% free and open source under the MIT license. No subscriptions, no in-app purchases, no ads. You can inspect every line of code on <a href="https://github.com/mikusnuz/nudge" style="color:var(--text);text-decoration:underline;">GitHub</a>.</p>
+    </details>
+    <details style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+      <summary style="cursor:pointer;font-weight:600;font-size:16px;list-style:none;">How does Nudge compare to Magnet or Rectangle?</summary>
+      <p style="color:var(--text-dim);margin-top:12px;line-height:1.7;">Nudge offers the same core features — halves, quarters, thirds, multi-monitor, and customizable shortcuts. Unlike Magnet ($9.99), Nudge is completely free. Built with pure Swift/AppKit with zero dependencies, resulting in a smaller footprint under 1MB.</p>
+    </details>
+    <details style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+      <summary style="cursor:pointer;font-weight:600;font-size:16px;list-style:none;">Does it work on Apple Silicon and Intel Macs?</summary>
+      <p style="color:var(--text-dim);margin-top:12px;line-height:1.7;">Yes. Nudge ships as a universal binary supporting both Apple Silicon (M1/M2/M3/M4) and Intel Macs. Requires macOS 11 Big Sur or later.</p>
+    </details>
+    <details style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+      <summary style="cursor:pointer;font-weight:600;font-size:16px;list-style:none;">How do I install Nudge?</summary>
+      <p style="color:var(--text-dim);margin-top:12px;line-height:1.7;">Via Homebrew: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;">brew tap mikusnuz/tap && brew install nudge-run</code>, or download the DMG from <a href="https://github.com/mikusnuz/nudge/releases/latest" style="color:var(--text);text-decoration:underline;">GitHub Releases</a>. Signed and notarized by Apple.</p>
+    </details>
+  </div>
+</section>
+
 <footer>
-  <p><a href="https://github.com/mikusnuz/nudge">GitHub</a> &middot; macOS 11+ &middot; MIT License</p>
+  <p><a href="https://github.com/mikusnuz/nudge">GitHub</a> &middot; <a href="https://nudge.run">nudge.run</a> &middot; macOS 11+ &middot; MIT License</p>
 </footer>
 
 </body>
