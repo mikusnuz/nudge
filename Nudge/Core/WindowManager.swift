@@ -161,16 +161,26 @@ final class WindowManager {
         return size
     }
 
-    func setPosition(of window: AXUIElement, to point: CGPoint) {
+    @discardableResult
+    func setPosition(of window: AXUIElement, to point: CGPoint) -> Bool {
         var p = point
         let value = AXValueCreate(.cgPoint, &p)!
-        AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, value)
+        let result = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, value)
+        if result != .success {
+            FileLog.write("setPosition FAILED: error=\(result.rawValue)")
+        }
+        return result == .success
     }
 
-    func setSize(of window: AXUIElement, to size: CGSize) {
+    @discardableResult
+    func setSize(of window: AXUIElement, to size: CGSize) -> Bool {
         var s = size
         let value = AXValueCreate(.cgSize, &s)!
-        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, value)
+        let result = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, value)
+        if result != .success {
+            FileLog.write("setSize FAILED: error=\(result.rawValue)")
+        }
+        return result == .success
     }
 
     // MARK: - Move Window to Frame
@@ -251,12 +261,92 @@ final class WindowManager {
     // MARK: - Snap Actions
 
     func performAction(_ action: SnapAction) {
-        guard let window = getFocusedWindow() else {
-            FileLog.write("performAction(\(action.rawValue)): no focused window")
-            os_log("performAction: no focused window", log: log, type: .error)
+        // Try AX-based window detection first
+        if let window = getFocusedWindow() {
+            var axPid: pid_t = 0
+            AXUIElementGetPid(window, &axPid)
+            let axName = NSRunningApplication(processIdentifier: axPid)?.localizedName ?? "?"
+            if let beforeFrame = getFrame(of: window) {
+                // Try AX move/resize
+                if let targetFrame = SnapZone.frame(for: action, on: DisplayHelper.shared.currentScreen(for: beforeFrame)) {
+                    let cgFrame = convertToCG(nsFrame: targetFrame, screen: DisplayHelper.shared.currentScreen(for: beforeFrame))
+                    let posOk = setPosition(of: window, to: cgFrame.origin)
+                    let sizeOk = setSize(of: window, to: cgFrame.size)
+                    // Verify move actually worked
+                    if let afterFrame = getFrame(of: window),
+                       abs(afterFrame.origin.x - cgFrame.origin.x) < 20 {
+                        FileLog.write("performAction(\(action.rawValue)): AX OK [\(axName)]")
+                        let windowID = getWindowID(of: window)
+                        if let wid = windowID {
+                            previousFrames[wid] = beforeFrame
+                            lastSnapAction = (windowID: wid, action: action, screen: DisplayHelper.shared.currentScreen(for: beforeFrame))
+                        }
+                        // Content re-layout nudge
+                        let finalSize = cgFrame.size
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                            let nudged = CGSize(width: finalSize.width + 1, height: finalSize.height)
+                            self?.setSize(of: window, to: nudged)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
+                                self?.setSize(of: window, to: finalSize)
+                            }
+                        }
+                        return
+                    }
+                    FileLog.write("performAction(\(action.rawValue)): AX move failed (pos=\(posOk) size=\(sizeOk)), trying SkyLight [\(axName)]")
+                } else {
+                    performActionOnAXWindow(window, action: action)
+                    return
+                }
+            }
+        }
+
+        // Fallback: SkyLight private API for apps that don't expose AX windows
+        // (e.g., Claude, some Electron apps)
+        FileLog.write("performAction(\(action.rawValue)): entering SkyLight fallback, available=\(SkyLight.isAvailable)")
+        guard let frontApp = NSWorkspace.shared.frontmostApplication else {
+            FileLog.write("SkyLight: no frontmostApplication")
+            return
+        }
+        let pid = frontApp.processIdentifier
+        let appName = frontApp.localizedName ?? "?"
+        FileLog.write("SkyLight: frontApp=\(appName) pid=\(pid) bundle=\(frontApp.bundleIdentifier ?? "nil")")
+
+        if let bundleID = frontApp.bundleIdentifier,
+           UserPreferences.shared.isAppIgnored(bundleID) {
+            FileLog.write("SkyLight: app is ignored")
             return
         }
 
+        if let result = SkyLight.findMainWindowWithBounds(pid: pid) {
+                let wid = result.wid
+                let currentBounds = result.bounds
+                FileLog.write("performAction: SkyLight [\(appName)] wid=\(wid) bounds=\(currentBounds)")
+                let currentScreen = DisplayHelper.shared.currentScreen(for: currentBounds)
+
+                if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
+                    let cgFrame = convertToCG(nsFrame: targetFrame, screen: currentScreen)
+                    let key = "\(pid)-\(wid)"
+                    previousFrames[key] = currentBounds
+                    let moved = SkyLight.moveWindow(windowID: wid, to: cgFrame.origin)
+                    FileLog.write("SkyLight.moveWindow: \(moved)")
+                    // Also try AX resize via PID-based element
+                    let axApp = AXUIElementCreateApplication(pid)
+                    var fw: AnyObject?
+                    if AXUIElementCopyAttributeValue(axApp, kAXFocusedWindowAttribute as CFString, &fw) == .success,
+                       let axWin = fw as! AXUIElement? {
+                        setSize(of: axWin, to: cgFrame.size)
+                    }
+                    return
+                }
+        } else {
+            FileLog.write("performAction: SkyLight findMainWindow failed [\(appName)]")
+        }
+
+        FileLog.write("performAction(\(action.rawValue)): no focused window")
+        os_log("performAction: no focused window", log: log, type: .error)
+    }
+
+    private func performActionOnAXWindow(_ window: AXUIElement, action: SnapAction) {
         var pid: pid_t = 0
         AXUIElementGetPid(window, &pid)
         let appName = NSRunningApplication(processIdentifier: pid)?.localizedName ?? "?"
@@ -300,7 +390,6 @@ final class WindowManager {
         if let targetFrame = SnapZone.frame(for: action, on: currentScreen) {
             let cgTarget = convertToCG(nsFrame: targetFrame, screen: currentScreen)
             let exactMatch = isFrameMatch(currentFrame, cgTarget)
-            // Also detect repeat: same window + same action + same screen (handles min-size apps)
             let repeatMatch = windowID != nil &&
                 lastSnapAction?.windowID == windowID &&
                 lastSnapAction?.action == action &&
