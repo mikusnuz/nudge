@@ -263,41 +263,8 @@ final class WindowManager {
     func performAction(_ action: SnapAction) {
         // Try AX-based window detection first
         if let window = getFocusedWindow() {
-            var axPid: pid_t = 0
-            AXUIElementGetPid(window, &axPid)
-            let axName = NSRunningApplication(processIdentifier: axPid)?.localizedName ?? "?"
-            if let beforeFrame = getFrame(of: window) {
-                // Try AX move/resize
-                if let targetFrame = SnapZone.frame(for: action, on: DisplayHelper.shared.currentScreen(for: beforeFrame)) {
-                    let cgFrame = convertToCG(nsFrame: targetFrame, screen: DisplayHelper.shared.currentScreen(for: beforeFrame))
-                    let posOk = setPosition(of: window, to: cgFrame.origin)
-                    let sizeOk = setSize(of: window, to: cgFrame.size)
-                    // Verify move actually worked
-                    if let afterFrame = getFrame(of: window),
-                       abs(afterFrame.origin.x - cgFrame.origin.x) < 20 {
-                        FileLog.write("performAction(\(action.rawValue)): AX OK [\(axName)]")
-                        let windowID = getWindowID(of: window)
-                        if let wid = windowID {
-                            previousFrames[wid] = beforeFrame
-                            lastSnapAction = (windowID: wid, action: action, screen: DisplayHelper.shared.currentScreen(for: beforeFrame))
-                        }
-                        // Content re-layout nudge
-                        let finalSize = cgFrame.size
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-                            let nudged = CGSize(width: finalSize.width + 1, height: finalSize.height)
-                            self?.setSize(of: window, to: nudged)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
-                                self?.setSize(of: window, to: finalSize)
-                            }
-                        }
-                        return
-                    }
-                    FileLog.write("performAction(\(action.rawValue)): AX move failed (pos=\(posOk) size=\(sizeOk)), trying SkyLight [\(axName)]")
-                } else {
-                    performActionOnAXWindow(window, action: action)
-                    return
-                }
-            }
+            performActionOnAXWindow(window, action: action)
+            return
         }
 
         // Fallback: SkyLight private API for apps that don't expose AX windows
