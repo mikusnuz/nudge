@@ -3,25 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nudge — Free Open Source Window Manager for Mac | Magnet Alternative</title>
-<meta name="description" content="Nudge is a free, open-source macOS window manager. Snap windows with keyboard shortcuts or drag-to-edge gestures. Halves, quarters, thirds, multi-monitor — lightweight Magnet & Rectangle alternative.">
-<meta name="keywords" content="mac window manager, macOS window tiling, free window manager mac, magnet alternative, rectangle alternative, snap windows mac, window snapping, open source window manager, mac productivity, keyboard window management">
+<title>Nudge — Free Mac Window Manager | Open Source Magnet Alternative</title>
+<meta name="description" content="Nudge is a free, open-source macOS window manager. Snap windows with keyboard shortcuts or drag-to-edge. 18 layouts, multi-monitor, thirds — better than Sequoia built-in tiling. Magnet & Rectangle alternative.">
+<meta name="keywords" content="mac window manager, free window manager mac, magnet alternative free, rectangle alternative, macos window tiling, window snapping mac, best mac window manager 2026, open source window manager mac, macos sequoia window manager alternative, snap windows keyboard shortcut mac, window tiling app mac, BetterSnapTool alternative, Moom alternative, macOS Big Sur Monterey Ventura Sonoma Sequoia">
 <meta name="author" content="Plumbug Studio">
 <link rel="canonical" href="https://nudge.run/">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta property="og:title" content="Nudge — Free Open Source Window Manager for Mac">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:title" content="Nudge — Free Mac Window Manager | Open Source Magnet Alternative">
 <meta property="og:description" content="Snap windows into perfect positions with keyboard shortcuts or drag-to-edge. 18 layouts, multi-monitor, fully customizable. Free and open source Magnet alternative.">
 <meta property="og:image" content="https://nudge.run/og-image.png">
 <meta property="og:url" content="https://nudge.run/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Nudge">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nudge — Free Open Source Window Manager for Mac">
+<meta name="twitter:title" content="Nudge — Free Mac Window Manager | Open Source Magnet Alternative">
 <meta name="twitter:description" content="Snap windows into perfect positions. 18 layouts, multi-monitor support. Free and open source macOS window manager.">
 <meta name="twitter:image" content="https://nudge.run/og-image.png">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0c0c0c">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -184,6 +188,7 @@
   .nav-links a {
     color: var(--text-dim); text-decoration: none; font-size: 14px; font-weight: 500;
     transition: color 0.2s;
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px;
   }
   .nav-links a:hover { color: var(--text); }
 
@@ -390,10 +395,10 @@
 <body>
 
 <!-- Nav -->
-<nav>
+<nav role="navigation" aria-label="Main">
   <div class="nav-inner">
-    <a href="#" class="logo">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+    <a href="#" class="logo" aria-label="Nudge home">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" role="img" aria-label="Nudge logo">
         <rect width="28" height="28" rx="6" fill="#1c1c1e"/>
         <rect x="3" y="3" width="10" height="10" rx="2" fill="rgba(255,255,255,0.3)"/>
         <rect x="3" y="15" width="10" height="10" rx="2" fill="rgba(255,255,255,0.3)"/>
@@ -402,15 +407,16 @@
       Nudge
     </a>
     <div class="nav-links">
-      <a href="#layouts">Layouts</a>
-      <a href="#features">Features</a>
-      <a href="#shortcuts">Shortcuts</a>
-      <a href="https://github.com/mikusnuz/nudge">GitHub</a>
+      <a href="#layouts" aria-label="Layouts section">Layouts</a>
+      <a href="#features" aria-label="Features section">Features</a>
+      <a href="#shortcuts" aria-label="Shortcuts section">Shortcuts</a>
+      <a href="https://github.com/mikusnuz/nudge" aria-label="Nudge on GitHub">GitHub</a>
     </div>
   </div>
 </nav>
 
 <!-- Hero -->
+<main>
 <div class="hero">
   <h1>Organize Your Workspace</h1>
   <p class="sub">Snap windows into the right position with keyboard shortcuts or drag-to-edge. Free, open source, and lightweight.</p>
@@ -424,7 +430,7 @@
 
   <!-- Animated Demo -->
   <div class="hero-demo">
-    <svg viewBox="0 0 480 280" id="demo-svg">
+    <svg viewBox="0 0 480 280" id="demo-svg" role="img" aria-label="Animated window layout demo showing Nudge in action">
       <rect x="2" y="2" width="476" height="276" rx="12" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
       <circle cx="20" cy="16" r="4" fill="#FF5F57"/>
       <circle cx="32" cy="16" r="4" fill="#FFBD2E"/>
@@ -481,7 +487,7 @@
   <div class="layout-grid">
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Left Half layout: window fills the left half of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
         <rect x="82" y="18" width="72" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -492,7 +498,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Right Half layout: window fills the right half of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="82" y="18" width="72" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -503,7 +509,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Maximize layout: window fills the entire screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="148" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
         <circle cx="14" cy="10" r="2.5" fill="#FF5F57"/><circle cx="22" cy="10" r="2.5" fill="#FFBD2E"/><circle cx="30" cy="10" r="2.5" fill="#28C840"/>
@@ -513,7 +519,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Top Left layout: window fills the top-left quarter of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.8)"/>
         <rect x="82" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -526,7 +532,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Bottom Left layout: window fills the bottom-left quarter of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="82" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -539,7 +545,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Left Third layout: window fills the left third of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
         <rect x="56" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -551,7 +557,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Center Third layout: window fills the center third of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="56" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -563,7 +569,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Left Two Thirds layout: window fills the left two thirds of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="96" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
         <rect x="106" y="18" width="48" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -574,7 +580,7 @@
     </div>
 
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Top Half layout: window fills the top half of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="148" height="35" rx="4" fill="rgba(255,255,255,0.8)"/>
         <rect x="6" y="57" width="148" height="37" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -586,7 +592,7 @@
 
     <!-- Bottom Half -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Bottom Half layout: window fills the bottom half of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="148" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="6" y="57" width="148" height="37" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -598,7 +604,7 @@
 
     <!-- Top Right -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Top Right layout: window fills the top-right quarter of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="82" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -612,7 +618,7 @@
 
     <!-- Bottom Right -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Bottom Right layout: window fills the bottom-right quarter of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="82" y="18" width="72" height="35" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -626,7 +632,7 @@
 
     <!-- Right Third -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Right Third layout: window fills the right third of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="56" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
@@ -639,7 +645,7 @@
 
     <!-- Center Two Thirds -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Center Two Thirds layout: window fills the center two thirds of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="22" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="32" y="18" width="96" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -652,7 +658,7 @@
 
     <!-- Right Two Thirds -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Right Two Thirds layout: window fills the right two thirds of the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="6" y="18" width="46" height="76" rx="4" fill="rgba(255,255,255,0.08)"/>
         <rect x="56" y="18" width="98" height="76" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -664,7 +670,7 @@
 
     <!-- Center -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Center layout: window is centered on the screen">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="32" y="28" width="96" height="58" rx="4" fill="rgba(255,255,255,0.8)"/>
         <circle cx="14" cy="10" r="2.5" fill="#FF5F57"/><circle cx="22" cy="10" r="2.5" fill="#FFBD2E"/><circle cx="30" cy="10" r="2.5" fill="#28C840"/>
@@ -675,7 +681,7 @@
 
     <!-- Restore -->
     <div class="layout-card">
-      <svg viewBox="0 0 160 100">
+      <svg viewBox="0 0 160 100" role="img" aria-label="Restore layout: window returns to its original position and size">
         <rect x="2" y="2" width="156" height="96" rx="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
         <rect x="46" y="28" width="80" height="50" rx="4" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
         <rect x="34" y="38" width="80" height="50" rx="4" fill="rgba(255,255,255,0.8)"/>
@@ -729,7 +735,7 @@
   <p class="desc" style="margin: 0 auto 48px;">Fully customizable in settings.</p>
 
   <table class="shortcuts-table">
-    <thead><tr><th>Action</th><th>Shortcut</th></tr></thead>
+    <thead><tr><th scope="col">Action</th><th scope="col">Shortcut</th></tr></thead>
     <tbody>
       <tr><td>Left Half</td><td>Ctrl Opt ←</td></tr>
       <tr><td>Right Half</td><td>Ctrl Opt →</td></tr>
@@ -779,7 +785,9 @@
   </div>
 </section>
 
-<footer>
+</main>
+
+<footer role="contentinfo">
   <p><a href="https://github.com/mikusnuz/nudge">GitHub</a> &middot; <a href="https://nudge.run">nudge.run</a> &middot; macOS 11+ &middot; MIT License</p>
 </footer>
 
