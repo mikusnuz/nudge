@@ -28,7 +28,8 @@
 <meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -113,7 +114,7 @@
     --card: #1a1a1c;
     --border: rgba(255,255,255,0.08);
     --text: #f0f0f2;
-    --text-dim: #7a7a80;
+    --text-dim: #8e8e96;
     --radius: 14px;
   }
 
@@ -397,7 +398,7 @@
 <!-- Nav -->
 <nav role="navigation" aria-label="Main">
   <div class="nav-inner">
-    <a href="#" class="logo" aria-label="Nudge home">
+    <a href="#" class="logo">
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none" role="img" aria-label="Nudge logo">
         <rect width="28" height="28" rx="6" fill="#1c1c1e"/>
         <rect x="3" y="3" width="10" height="10" rx="2" fill="rgba(255,255,255,0.3)"/>
