@@ -23,6 +23,7 @@ Pods/
 *~
 build/
 docs/
+landing/
 node_modules/
 scripts/.env*
 *.env
