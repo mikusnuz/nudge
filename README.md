@@ -1,5 +1,10 @@
 # Nudge
 
+![macOS](https://img.shields.io/badge/macOS-11%2B-black)
+![License](https://img.shields.io/badge/license-MIT-green)
+![GitHub release](https://img.shields.io/github/v/release/mikusnuz/nudge)
+![Downloads](https://img.shields.io/github/downloads/mikusnuz/nudge/total)
+
 A free, open-source macOS window manager.
 
 Nudge lets you snap, resize, and organize your windows with keyboard shortcuts and drag-to-edge gestures — no subscription required.
@@ -83,6 +88,20 @@ open Nudge.xcodeproj
 Press **⌘R** to build and run.
 
 On first launch, grant Nudge **Accessibility** permissions when prompted in System Settings → Privacy & Security → Accessibility.
+
+---
+
+## Comparison
+
+| | Nudge | Magnet | Rectangle |
+|---|---|---|---|
+| Price | Free | $9.99 | Free |
+| Open Source | Yes (MIT) | No | Yes |
+| App Size | <1MB | ~5MB | ~15MB |
+| Drag-to-Edge | Yes | Yes | Yes |
+| Custom Shortcuts | Yes | Limited | Yes |
+| Multi-Monitor | Yes | Yes | Yes |
+| App Store Required | No | Yes | No |
 
 ---
 
