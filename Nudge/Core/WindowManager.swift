@@ -3,6 +3,7 @@ import ApplicationServices
 import os.log
 
 private let log = OSLog(subsystem: "run.nudge.app", category: "WindowManager")
+private let kAXEnhancedUserInterface = "AXEnhancedUserInterface" as CFString
 
 final class WindowManager {
     static let shared = WindowManager()
@@ -161,26 +162,16 @@ final class WindowManager {
         return size
     }
 
-    @discardableResult
-    func setPosition(of window: AXUIElement, to point: CGPoint) -> Bool {
+    func setPosition(of window: AXUIElement, to point: CGPoint) {
         var p = point
         let value = AXValueCreate(.cgPoint, &p)!
-        let result = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, value)
-        if result != .success {
-            FileLog.write("setPosition FAILED: error=\(result.rawValue)")
-        }
-        return result == .success
+        AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, value)
     }
 
-    @discardableResult
-    func setSize(of window: AXUIElement, to size: CGSize) -> Bool {
+    func setSize(of window: AXUIElement, to size: CGSize) {
         var s = size
         let value = AXValueCreate(.cgSize, &s)!
-        let result = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, value)
-        if result != .success {
-            FileLog.write("setSize FAILED: error=\(result.rawValue)")
-        }
-        return result == .success
+        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, value)
     }
 
     // MARK: - Move Window to Frame
@@ -190,18 +181,21 @@ final class WindowManager {
            let windowID = getWindowID(of: window) {
             previousFrames[windowID] = currentFrame
         }
+        disableEnhancedUI(for: window)
         setPosition(of: window, to: frame.origin)
         setSize(of: window, to: frame.size)
-        // Force content re-layout: after a brief delay, nudge size by 1px then restore.
-        // This makes apps like KakaoTalk, Electron apps, etc. re-render their internal content.
-        let finalSize = frame.size
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-            let nudged = CGSize(width: finalSize.width + 1, height: finalSize.height)
-            self?.setSize(of: window, to: nudged)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
-                self?.setSize(of: window, to: finalSize)
-            }
-        }
+    }
+
+    /// Disable AXEnhancedUserInterface on the app — Chrome/Chromium enables this
+    /// which causes animated window moves via AX. Rectangle uses the same workaround.
+    private func disableEnhancedUI(for window: AXUIElement) {
+        var pid: pid_t = 0
+        guard AXUIElementGetPid(window, &pid) == .success else { return }
+        let app = AXUIElementCreateApplication(pid)
+        var value: AnyObject?
+        guard AXUIElementCopyAttributeValue(app, kAXEnhancedUserInterface, &value) == .success,
+              let enabled = value as? NSNumber, enabled.boolValue else { return }
+        AXUIElementSetAttributeValue(app, kAXEnhancedUserInterface, kCFBooleanFalse)
     }
 
     // MARK: - Restore
