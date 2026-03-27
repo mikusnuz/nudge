@@ -24,3 +24,6 @@ Pods/
 build/
 docs/
 node_modules/
+scripts/.env*
+*.env
+.env.*

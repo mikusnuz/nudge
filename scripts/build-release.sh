@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-# Config
+# Config — credentials from environment variables
 APP_NAME="Nudge"
 BUNDLE_ID="app.nudge.Nudge"
-TEAM_ID="REDACTED"
-IDENTITY="Developer ID Application: REDACTED (REDACTED)"
-APPLE_ID="REDACTED"
-APP_SPECIFIC_PASSWORD="REDACTED"
+TEAM_ID="${NUDGE_TEAM_ID:?Set NUDGE_TEAM_ID env var}"
+IDENTITY="Developer ID Application: REDACTED (${TEAM_ID})"
+APPLE_ID="${NUDGE_APPLE_ID:?Set NUDGE_APPLE_ID env var}"
+APP_SPECIFIC_PASSWORD="${NUDGE_APP_PASSWORD:?Set NUDGE_APP_PASSWORD env var}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
